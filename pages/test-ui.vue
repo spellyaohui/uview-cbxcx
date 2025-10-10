@@ -222,7 +222,7 @@
 
 .modern-navbar {
 	background: var(--primary-gradient);
-	padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-xl);
+	padding: calc(var(--spacing-lg) + var(--status-bar-height)) var(--spacing-lg) var(--spacing-xl);
 	text-align: center;
 	box-shadow: var(--shadow-lg);
 	position: relative;

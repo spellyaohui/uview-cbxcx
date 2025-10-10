@@ -211,5 +211,6 @@
             "enable" : false
         }
     },
-    "fallbackLocale" : "zh-Hans"
+    "fallbackLocale" : "zh-Hans",
+    "locale" : "zh-Hans"
 }

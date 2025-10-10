@@ -142,6 +142,55 @@
 		</view>
 	</view>
 
+	<!-- 下载进度模态框 -->
+	<view v-if="showDownloadModal" class="modal-overlay">
+		<view class="download-modal modern-modal" @click.stop>
+			<view class="modal-header">
+				<view class="modal-title">下载报告</view>
+			</view>
+
+			<view class="modal-content">
+				<view class="download-info">
+					<view class="download-icon">
+						<view class="icon-circle" :class="downloadStatus">
+							<text class="fas" :class="getDownloadIcon()"></text>
+						</view>
+					</view>
+					<view class="download-details">
+						<view class="download-filename">
+							{{ downloadingReport?.PATHNAME || '未知报告' }}
+						</view>
+						<view class="download-status-text">
+							{{ getDownloadStatusText() }}
+						</view>
+					</view>
+				</view>
+
+				<!-- 进度条 -->
+				<view class="progress-container">
+					<view class="progress-bar">
+						<view class="progress-fill" :style="{ width: downloadProgress + '%' }"></view>
+					</view>
+					<view class="progress-text">{{ downloadProgress }}%</view>
+				</view>
+
+				<!-- 状态描述 -->
+				<view class="status-description">
+					<text v-if="downloadStatus === 'preparing'">正在准备下载链接...</text>
+					<text v-else-if="downloadStatus === 'downloading'">正在下载报告文件...</text>
+					<text v-else-if="downloadStatus === 'completed'">下载完成，即将打开文件</text>
+					<text v-else-if="downloadStatus === 'error'">下载失败，请重试</text>
+				</view>
+			</view>
+
+			<view class="modal-footer">
+				<button v-if="downloadStatus === 'error'" class="modern-btn modern-btn-primary" @click="showDownloadModal = false">
+					关闭
+				</button>
+			</view>
+		</view>
+	</view>
+
 	<!-- 删除确认模态框 -->
 	<view v-if="showDeleteModal" class="modal-overlay" @click="closeDeleteModal">
 		<view class="modern-modal delete-modal" @click.stop>
@@ -214,7 +263,12 @@
 				sortBy: 'date',
 				showDeleteModal: false,
 				selectedReport: null,
-				todayReports: 0
+				todayReports: 0,
+				// 下载进度相关
+				showDownloadModal: false,
+				downloadingReport: null,
+				downloadProgress: 0,
+				downloadStatus: 'preparing', // preparing, downloading, completed, error
 			};
 		},
 		computed: {
@@ -354,16 +408,17 @@
 
 			// 下载报告
 			async downloadReport(item) {
-				uni.showLoading({
-					title: '准备下载...'
-				});
+				this.downloadingReport = item;
+				this.downloadProgress = 0;
+				this.showDownloadModal = true;
 
 				try {
 					await this.xzbgApi({
 						reportid: item.cxid
 					});
 				} catch (error) {
-					uni.hideLoading();
+					this.showDownloadModal = false;
+					this.downloadingReport = null;
 					uni.showToast({
 						title: '下载失败',
 						icon: 'none'
@@ -484,11 +539,24 @@
 				};
 
 				try {
+					// 模拟准备阶段进度
+					this.downloadStatus = 'preparing';
+					let progress = 0;
+					const prepareInterval = setInterval(() => {
+						progress += 10;
+						this.downloadProgress = Math.min(progress, 30);
+						if (progress >= 30) {
+							clearInterval(prepareInterval);
+						}
+					}, 100);
+
 					let xzbg = await this.$http.post(http_url, http_data, http_header, 'json');
 					this.xzbg = xzbg;
 
 					if (xzbg.code == 200) {
 						var url = xzbg.url;
+						this.downloadStatus = 'downloading';
+						this.downloadProgress = 30;
 
 						// #ifdef APP-PLUS
 						let dtask = plus.downloader.createDownload(
@@ -497,56 +565,96 @@
 								filename: 'file://storage/emulated/0/pdf/' + xzbg.PATHNAME
 							},
 							function (d, status) {
-								uni.hideLoading();
 								if (status == 200) {
-									let fileSaveUrl = plus.io.convertLocalFileSystemURL(d.filename);
-									plus.runtime.openFile(d.filename);
+									thiz.downloadStatus = 'completed';
+									thiz.downloadProgress = 100;
 
-									uni.showToast({
-										title: '下载成功',
-										icon: 'success'
-									});
+									setTimeout(() => {
+										thiz.showDownloadModal = false;
+										thiz.downloadingReport = null;
+
+										let fileSaveUrl = plus.io.convertLocalFileSystemURL(d.filename);
+										plus.runtime.openFile(d.filename);
+
+										uni.showToast({
+											title: '下载成功',
+											icon: 'success'
+										});
+									}, 1000);
 								} else {
+									thiz.downloadStatus = 'error';
 									plus.downloader.clear();
-									uni.showToast({
-										title: '下载失败',
-										icon: 'none'
-									});
+
+									setTimeout(() => {
+										thiz.showDownloadModal = false;
+										thiz.downloadingReport = null;
+										uni.showToast({
+											title: '下载失败',
+											icon: 'none'
+										});
+									}, 1000);
 								}
 							}
 						);
+
+						// 监听下载进度
+						dtask.addEventListener("statechanged", function (download, status) {
+							if (download.state == 3 && download.downloadedSize > 0 && download.totalSize > 0) {
+								let progress = Math.round((download.downloadedSize / download.totalSize) * 70);
+								thiz.downloadProgress = 30 + progress;
+							}
+						}, false);
+
 						dtask.start();
 						// #endif
 
 						// #ifdef H5
 						// H5端直接打开链接
-						window.open(url, '_blank');
-						uni.hideLoading();
+						this.downloadStatus = 'completed';
+						this.downloadProgress = 100;
+
+						setTimeout(() => {
+							this.showDownloadModal = false;
+							this.downloadingReport = null;
+							window.open(url, '_blank');
+						}, 1000);
 						// #endif
 
 						// #ifdef MP
 						// 小程序端提示下载
-						uni.showModal({
-							title: '下载提示',
-							content: '请在APP中使用下载功能',
-							showCancel: false
-						});
-						uni.hideLoading();
+						this.downloadStatus = 'error';
+						setTimeout(() => {
+							this.showDownloadModal = false;
+							this.downloadingReport = null;
+							uni.showModal({
+								title: '下载提示',
+								content: '请在APP中使用下载功能',
+								showCancel: false
+							});
+						}, 1000);
 						// #endif
 					} else {
-						uni.hideLoading();
-						uni.showToast({
-							title: xzbg.msg || '获取下载链接失败',
-							icon: 'none'
-						});
+						this.downloadStatus = 'error';
+						setTimeout(() => {
+							this.showDownloadModal = false;
+							this.downloadingReport = null;
+							uni.showToast({
+								title: xzbg.msg || '获取下载链接失败',
+								icon: 'none'
+							});
+						}, 1000);
 					}
 				} catch (error) {
-					uni.hideLoading();
-					console.error('下载报告失败:', error);
-					uni.showToast({
-						title: '下载失败，请重试',
-						icon: 'none'
-					});
+					this.downloadStatus = 'error';
+					setTimeout(() => {
+						this.showDownloadModal = false;
+						this.downloadingReport = null;
+						console.error('下载报告失败:', error);
+						uni.showToast({
+							title: '下载失败，请重试',
+							icon: 'none'
+						});
+					}, 1000);
 				}
 			},
 
@@ -579,6 +687,38 @@
 				}
 			},
 
+			// 获取下载图标
+			getDownloadIcon() {
+				switch (this.downloadStatus) {
+					case 'preparing':
+						return 'fa-clock';
+					case 'downloading':
+						return 'fa-download';
+					case 'completed':
+						return 'fa-check';
+					case 'error':
+						return 'fa-exclamation-triangle';
+					default:
+						return 'fa-download';
+				}
+			},
+
+			// 获取下载状态文本
+			getDownloadStatusText() {
+				switch (this.downloadStatus) {
+					case 'preparing':
+						return '准备中';
+					case 'downloading':
+						return '下载中';
+					case 'completed':
+						return '已完成';
+					case 'error':
+						return '下载失败';
+					default:
+						return '准备中';
+				}
+			},
+
 			changeNavbarHeight(val) {
 				this.navbarHeight = val;
 			}
@@ -603,7 +743,7 @@
 /* 现代化导航栏 */
 .modern-navbar {
 	background: var(--primary-gradient);
-	padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-xl);
+	padding: calc(var(--spacing-lg) + var(--status-bar-height)) var(--spacing-lg) var(--spacing-xl);
 	display: flex;
 	align-items: center;
 	box-shadow: var(--shadow-lg);
@@ -1018,6 +1158,138 @@
 	color: var(--text-secondary);
 }
 
+/* 下载进度模态框 */
+.download-modal {
+	max-width: 500rpx;
+	width: 90%;
+}
+
+.download-info {
+	display: flex;
+	align-items: center;
+	margin-bottom: var(--spacing-xl);
+}
+
+.download-icon {
+	margin-right: var(--spacing-md);
+}
+
+.icon-circle {
+	width: 100rpx;
+	height: 100rpx;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+
+	&.preparing {
+		background: rgba(245, 158, 11, 0.1);
+
+		.fas {
+			color: var(--warning-color);
+			font-size: 40rpx;
+			animation: pulse 2s infinite;
+		}
+	}
+
+	&.downloading {
+		background: rgba(37, 99, 235, 0.1);
+
+		.fas {
+			color: var(--primary-color);
+			font-size: 40rpx;
+			animation: bounce 1s infinite;
+		}
+	}
+
+	&.completed {
+		background: rgba(16, 185, 129, 0.1);
+
+		.fas {
+			color: var(--success-color);
+			font-size: 40rpx;
+		}
+	}
+
+	&.error {
+		background: rgba(239, 68, 68, 0.1);
+
+		.fas {
+			color: var(--error-color);
+			font-size: 40rpx;
+		}
+	}
+}
+
+.download-details {
+	flex: 1;
+}
+
+.download-filename {
+	font-size: 30rpx;
+	font-weight: 600;
+	color: var(--text-primary);
+	margin-bottom: var(--spacing-xs);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.download-status-text {
+	font-size: 24rpx;
+	color: var(--text-secondary);
+}
+
+.progress-container {
+	margin-bottom: var(--spacing-lg);
+}
+
+.progress-bar {
+	width: 100%;
+	height: 8rpx;
+	background: var(--bg-tertiary);
+	border-radius: 4rpx;
+	overflow: hidden;
+	margin-bottom: var(--spacing-sm);
+}
+
+.progress-fill {
+	height: 100%;
+	background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+	border-radius: 4rpx;
+	transition: width 0.3s ease;
+	position: relative;
+
+	&::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+		animation: shimmer 2s infinite;
+	}
+}
+
+.progress-text {
+	text-align: center;
+	font-size: 24rpx;
+	color: var(--text-secondary);
+	font-weight: 500;
+}
+
+.status-description {
+	text-align: center;
+
+	text {
+		font-size: 26rpx;
+		color: var(--text-secondary);
+		line-height: 1.5;
+	}
+}
+
 /* 删除模态框 */
 .modal-overlay {
 	position: fixed;
@@ -1148,6 +1420,35 @@
 @keyframes spin {
 	to {
 		transform: rotate(360deg);
+	}
+}
+
+@keyframes pulse {
+	0%, 100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 0.8;
+		transform: scale(1.05);
+	}
+}
+
+@keyframes bounce {
+	0%, 100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-10rpx);
+	}
+}
+
+@keyframes shimmer {
+	0% {
+		transform: translateX(-100%);
+	}
+	100% {
+		transform: translateX(100%);
 	}
 }
 

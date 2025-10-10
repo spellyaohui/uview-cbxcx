@@ -85,7 +85,8 @@ import {
 import Tools from '@/common/Tools.js'
 import HttpService from '@/common/HttpService.js'
 import Session from '@/common/Session.js'
-// 移除uView，将使用ColorUI + 自定义组件
+// 引入uView Plus
+import uviewPlus from 'uview-plus'
 import Auth from './common/Auth'
 
 import {
@@ -96,8 +97,8 @@ import {
 export function createApp() {
 	const app = createSSRApp(App)
 
-	// uView 2.0 Vue 3 配置
-	// 移除uView，将使用ColorUI + 自定义组件
+	// 使用uView Plus
+	app.use(uviewPlus)
 
 	app.config.globalProperties.$tools = new Tools()
 	app.config.globalProperties.$http = new HttpService()
@@ -106,6 +107,9 @@ export function createApp() {
 
 	uni.getSystemInfo({
 		success: function(e) {
+			// 在App.vue中设置状态栏高度
+			app.config.globalProperties.statusBarHeight = e.statusBarHeight || 44;
+
 			// #ifndef MP
 			app.config.globalProperties.StatusBar = e.statusBarHeight;
 			if (e.platform == 'android') {

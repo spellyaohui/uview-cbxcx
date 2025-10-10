@@ -9,5 +9,8 @@
   },
   "keywords": [],
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "dependencies": {
+    "uview-plus": "^3.6.4"
+  }
 }

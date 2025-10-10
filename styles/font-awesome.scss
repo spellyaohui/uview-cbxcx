@@ -9,6 +9,7 @@
        url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/webfonts/fa-solid-900.woff') format('woff'),
        url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/webfonts/fa-solid-900.ttf') format('truetype'),
        url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/webfonts/fa-solid-900.svg#fontawesome') format('svg');
+  font-display: swap; /* 优化字体加载 */
 }
 
 .fas {
@@ -20,6 +21,8 @@
   line-height: 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  display: inline-block;
+  min-width: 1em; /* 确保图标有最小宽度 */
 }
 
 /* 常用图标定义 */
@@ -44,3 +47,20 @@
 .fa-sun::before { content: "\f185"; }
 .fa-moon::before { content: "\f186"; }
 .fa-lock::before { content: "\f023"; }
+.fa-home::before { content: "\f015"; }
+.fa-check::before { content: "\f00c"; }
+.fa-camera::before { content: "\f030"; }
+.fa-photo::before { content: "\f03e"; }
+.fa-clock::before { content: "\f017"; }
+.fa-calendar::before { content: "\f073"; }
+.fa-phone::before { content: "\f095"; }
+.fa-envelope::before { content: "\f0e0"; }
+.fa-map-marker-alt::before { content: "\f3c5"; }
+.fa-edit::before { content: "\f044"; }
+.fa-save::before { content: "\f0c7"; }
+.fa-print::before { content: "\f02f"; }
+.fa-share::before { content: "\f064"; }
+.fa-star::before { content: "\f005"; }
+.fa-heart::before { content: "\f004"; }
+.fa-thumbs-up::before { content: "\f164"; }
+.fa-thumbs-down::before { content: "\f165"; }

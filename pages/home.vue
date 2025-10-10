@@ -375,7 +375,7 @@
 /* 现代化导航栏 */
 .modern-navbar {
 	background: var(--primary-gradient);
-	padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-xl);
+	padding: calc(var(--spacing-lg) + var(--status-bar-height)) var(--spacing-lg) var(--spacing-xl);
 	border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
 	box-shadow: var(--shadow-lg);
 	position: relative;

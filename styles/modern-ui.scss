@@ -1,5 +1,17 @@
 /* 现代化UI样式 - ColorUI + 自定义设计 + 黑暗模式支持 */
 
+/* ===== 状态栏高度变量 ===== */
+:root {
+  --status-bar-height: 44px; /* 默认状态栏高度 */
+}
+
+/* 响应式状态栏高度 */
+@media screen and (max-width: 750rpx) {
+  :root {
+    --status-bar-height: 40px;
+  }
+}
+
 /* ===== 颜色系统 - 默认（浅色模式） ===== */
 :root, [data-theme="light"] {
   /* 主色调 - 现代蓝色系 */
@@ -198,7 +210,7 @@
 /* 现代化导航栏 */
 .modern-navbar {
   background: var(--primary-gradient);
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: calc(var(--spacing-md) + var(--status-bar-height)) var(--spacing-lg);
   border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
   box-shadow: var(--shadow-lg);
 }

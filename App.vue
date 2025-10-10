@@ -17,6 +17,9 @@
 			// 初始化主题管理器
 			this.initThemeManager();
 
+			// 获取状态栏高度并设置全局变量
+			this.setStatusBarHeight();
+
 			// 增强型参数解析函数 - 处理URL Scheme和推送冷启动
 						const parseIdFromArgs = (args) => {
 							if (!args) return null;
@@ -226,19 +229,59 @@
 			// 获取当前主题 - 使用主题管理器
 			getCurrentTheme() {
 				return this.globalData.themeManager.getCurrentTheme();
+			},
+
+			// 设置状态栏高度
+			setStatusBarHeight() {
+				uni.getSystemInfo({
+					success: (e) => {
+						const statusBarHeight = e.statusBarHeight || 44;
+						this.globalData.statusBarHeight = statusBarHeight;
+
+						// 在页面加载后设置CSS变量
+						this.$nextTick(() => {
+							// 通过动态样式设置状态栏高度
+							const style = document.createElement('style');
+							style.textContent = `
+								:root {
+									--status-bar-height: ${statusBarHeight}px;
+								}
+							`;
+							document.head.appendChild(style);
+						});
+					},
+					fail: () => {
+						// 获取失败时使用默认值
+						const defaultHeight = 44;
+						this.globalData.statusBarHeight = defaultHeight;
+
+						this.$nextTick(() => {
+							const style = document.createElement('style');
+							style.textContent = `
+								:root {
+									--status-bar-height: ${defaultHeight}px;
+								}
+							`;
+							document.head.appendChild(style);
+						});
+					}
+				});
 			}
 		}
 	};
 </script>
 <style lang="scss">
+	// 引入uView Plus样式
+	@import 'uview-plus/index.scss';
+
 	// 引入现代化UI样式
 	@import 'styles/modern-ui.scss';
 
 	// 引入Font Awesome图标样式
 	@import 'styles/font-awesome.scss';
 
-	// 保留必要的自定义样式
-	@import 'common/diygw-ui/animate.css';
+	// 保留必要的自定义样式（移除diy相关引用）
+	// @import 'common/diygw-ui/animate.css';
 
 	// 基础样式重置
 	* {

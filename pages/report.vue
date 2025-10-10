@@ -627,7 +627,7 @@
 /* 现代化导航栏 */
 .modern-navbar {
 	background: var(--primary-gradient);
-	padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-xl);
+	padding: calc(var(--spacing-lg) + var(--status-bar-height)) var(--spacing-lg) var(--spacing-xl);
 	display: flex;
 	align-items: center;
 	box-shadow: var(--shadow-lg);

@@ -1,0 +1,46 @@
+/* Font Awesome 图标字体样式 */
+@font-face {
+  font-family: 'Font Awesome 5 Free';
+  font-style: normal;
+  font-weight: 900;
+  src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/webfonts/fa-solid-900.eot');
+  src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/webfonts/fa-solid-900.eot?#iefix') format('embedded-opentype'),
+       url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/webfonts/fa-solid-900.woff2') format('woff2'),
+       url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/webfonts/fa-solid-900.woff') format('woff'),
+       url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/webfonts/fa-solid-900.ttf') format('truetype'),
+       url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/webfonts/fa-solid-900.svg#fontawesome') format('svg');
+}
+
+.fas {
+  font-family: 'Font Awesome 5 Free', sans-serif;
+  font-weight: 900;
+  font-style: normal;
+  font-variant: normal;
+  text-rendering: auto;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 常用图标定义 */
+.fa-arrow-left::before { content: "\f060"; }
+.fa-search::before { content: "\f002"; }
+.fa-user::before { content: "\f007"; }
+.fa-user-circle::before { content: "\f2bd"; }
+.fa-qrcode::before { content: "\f029"; }
+.fa-list::before { content: "\f0ca"; }
+.fa-cogs::before { content: "\f085"; }
+.fa-inbox::before { content: "\f01c"; }
+.fa-times::before { content: "\f00d"; }
+.fa-sync-alt::before { content: "\f2f1"; }
+.fa-folder::before { content: "\f07b"; }
+.fa-file-alt::before { content: "\f15c"; }
+.fa-ellipsis-v::before { content: "\f142"; }
+.fa-download::before { content: "\f019"; }
+.fa-trash::before { content: "\f1f8"; }
+.fa-exclamation-triangle::before { content: "\f071"; }
+.fa-chevron-right::before { content: "\f054"; }
+.fa-sign-out-alt::before { content: "\f2f5"; }
+.fa-sun::before { content: "\f185"; }
+.fa-moon::before { content: "\f186"; }
+.fa-lock::before { content: "\f023"; }

@@ -1,0 +1,24 @@
+{
+  "light": {
+    "navBgColor": "#07c160",
+    "navTxtStyle": "white",
+    "bgColor": "#ffffff",
+    "textColor": "#333333",
+    "subTextColor": "#666666",
+    "borderColor": "#e5e5e5",
+    "cardBgColor": "#ffffff",
+    "inputBgColor": "#f8f9fa",
+    "placeholderColor": "#999999"
+  },
+  "dark": {
+    "navBgColor": "#1a1a1a",
+    "navTxtStyle": "white",
+    "bgColor": "#121212",
+    "textColor": "#ffffff",
+    "subTextColor": "#cccccc",
+    "borderColor": "#333333",
+    "cardBgColor": "#1e1e1e",
+    "inputBgColor": "#2a2a2a",
+    "placeholderColor": "#888888"
+  }
+}

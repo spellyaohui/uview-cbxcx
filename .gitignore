@@ -1,0 +1,161 @@
+# Claude 指导文件
+CLAUDE.md
+.claude/
+
+# 依赖目录
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# HBuilderX 特有文件和目录
+.hbuilderx/
+.hbuilderx/
+.hbuilderx/**/*
+unpackage/
+unpackage/**/*
+platforms/
+platforms/**/*
+
+# UniApp 编译输出
+dist/
+dist/**/*
+build/
+build/**/*
+.tmp/
+.tmp/**/*
+
+# 敏感配置文件
+siteinfo.js
+.env
+.env.*
+*.env
+config.js
+config.json
+secrets.json
+credentials.json
+keys.json
+private.key
+*.pem
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+# 微信小程序相关
+project.private.config.json
+project.config.json
+sitemap.json
+qrcode.jpg
+
+# 日志文件
+*.log
+logs/
+logs/**/*
+
+# 缓存文件
+.cache/
+.cache/**/*
+*.cache
+.DS_Store
+Thumbs.db
+
+# 编辑器和IDE配置
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 系统文件
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# 临时文件
+*.tmp
+*.temp
+temp/
+tmp/
+
+# 云函数相关
+uniCloud-aliyun/cloudfunctions/node_modules/
+uniCloud-aliyun/cloudfunctions/**/node_modules/
+uniCloud-aliyun/cloudfunctions/**/.env
+
+# 证书和签名文件
+*.cert
+*.cer
+*.crt
+*.key
+*.p8
+*.mobileprovision
+*.xcent
+
+# 压缩包
+*.zip
+*.rar
+*.7z
+*.tar
+*.tar.gz
+*.tar.bz2
+
+# 数据库文件
+*.db
+*.sqlite
+*.sqlite3
+
+# 备份文件
+*.bak
+*.backup
+*.old
+
+# 调试和分析文件
+*.map
+coverage/
+.nyc_output/
+
+# 测试输出
+test-results/
+coverage/
+junit.xml
+
+# 本地配置文件
+.local.*
+local.*
+*local.json
+*.local
+
+# 文档生成目录
+docs/_build/
+docs/build/
+
+# 私有配置目录
+private/
+.private/
+
+# 第三方服务配置
+alipay-config.json
+wx-config.json
+qq-config.json
+baidu-config.json
+
+# 推送相关配置
+push-config.json
+jpush-config.json
+
+# 地图服务配置
+map-config.json
+qqmap-key.json
+
+# 统计分析配置
+analytics-config.json
+stat-config.json
+
+# 支付相关配置
+payment-config.json
+pay-config.json
+wechat-pay.json
+alipay-config.json

@@ -1,0 +1,75 @@
+{
+    "pages": [
+        {
+            "path": "pages/index",
+            "style": {
+                "navigationBarTextStyle": "white",
+                "navigationBarTitleText": "程序登录",
+                "navigationBarBackgroundColor": "#0796c1"
+            }
+        },
+        {
+            "path": "pages/home",
+            "style": {
+                "navigationBarTextStyle": "white",
+                "navigationBarTitleText": "主页",
+                "navigationBarBackgroundColor": "#0796c1",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/report",
+            "style": {
+                "navigationBarTextStyle": "white",
+                "navigationBarTitleText": "电子报告",
+                "navigationBarBackgroundColor": "#0796c1",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/myreport",
+            "style": {
+                "navigationBarTextStyle": "white",
+                "navigationBarTitleText": "我的报告",
+                "navigationBarBackgroundColor": "#0796c1",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/test-ui",
+            "style": {
+                "navigationBarTextStyle": "white",
+                "navigationBarTitleText": "UI测试",
+                "navigationBarBackgroundColor": "#07c160",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/webview",
+            "style": {
+                "navigationBarTitleText": ""
+            }
+        },
+        {
+            "path": "uni_modules/uni-upgrade-center-app/pages/upgrade-popup",
+            "style": {
+                "disableScroll": true,
+                "app-plus": {
+                    "backgroundColorTop": "transparent",
+                    "background": "transparent",
+                    "titleNView": false,
+                    "scrollIndicator": false,
+                    "popGesture": "none",
+                    "animationType": "fade-in",
+                    "animationDuration": 200
+                }
+            }
+        }
+    ],
+    "globalStyle": {
+        "navigationBarTextStyle": "@navTxtStyle",
+        "navigationBarTitleText": "崔博小程序",
+        "navigationBarBackgroundColor": "@navBgColor",
+        "backgroundColor": "@bgColor"
+    }
+}

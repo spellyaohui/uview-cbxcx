@@ -122,7 +122,7 @@
 				</view>
 
 				<!-- 空状态 -->
-				<view v-if="hqbgls.data.length === 0 && !loading" class="empty-state">
+				<view v-if="hqbgls.data.length === 0" class="empty-state">
 					<view class="empty-icon">
 						<text class="fas fa-inbox"></text>
 					</view>
@@ -134,12 +134,7 @@
 				</view>
 			</view>
 
-			<!-- 加载状态 -->
-			<view v-if="loading" class="loading-state">
-				<view class="loading-spinner"></view>
-				<view class="loading-text">加载中...</view>
 			</view>
-		</view>
 	</view>
 
 	<!-- 下载进度模态框 -->
@@ -157,7 +152,7 @@
 						</view>
 					</view>
 					<view class="download-details">
-						<view class="download-filename">
+						<view class="download-filename" :title="downloadingReport?.PATHNAME || '未知报告'">
 							{{ downloadingReport?.PATHNAME || '未知报告' }}
 						</view>
 						<view class="download-status-text">
@@ -1137,26 +1132,6 @@
 	margin-bottom: var(--spacing-xl);
 }
 
-/* 加载状态 */
-.loading-state {
-	text-align: center;
-	padding: var(--spacing-2xl) var(--spacing-lg);
-}
-
-.loading-spinner {
-	width: 60rpx;
-	height: 60rpx;
-	border: 4rpx solid var(--border-color);
-	border-top-color: var(--primary-color);
-	border-radius: 50%;
-	margin: 0 auto var(--spacing-md);
-	animation: spin 1s linear infinite;
-}
-
-.loading-text {
-	font-size: 26rpx;
-	color: var(--text-secondary);
-}
 
 /* 下载进度模态框 */
 .download-modal {
@@ -1168,10 +1143,11 @@
 	display: flex;
 	align-items: center;
 	margin-bottom: var(--spacing-xl);
+	gap: var(--spacing-md);
 }
 
 .download-icon {
-	margin-right: var(--spacing-md);
+	flex-shrink: 0; /* 防止图标被压缩 */
 }
 
 .icon-circle {
@@ -1224,6 +1200,7 @@
 
 .download-details {
 	flex: 1;
+	min-width: 0; /* 关键：允许flex子项收缩 */
 }
 
 .download-filename {
@@ -1234,6 +1211,9 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+	width: 100%;
+	display: block;
+	word-break: break-all; /* 防止长单词溢出 */
 }
 
 .download-status-text {

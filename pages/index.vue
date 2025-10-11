@@ -1,5 +1,8 @@
 <template>
 	<view class="login-container">
+		<!-- 状态栏占位区域 -->
+		<view class="status-bar-placeholder"></view>
+
 		<!-- 顶部装饰元素 -->
 		<view class="login-header">
 			<view class="header-decoration"></view>
@@ -101,6 +104,14 @@
 		},
 		onShow() {
 			this.setCurrentPage(this);
+
+			// 确保状态栏样式正确
+			// #ifdef APP-PLUS
+			setTimeout(() => {
+				plus.navigator.setStatusBarBackground('transparent');
+				plus.navigator.setStatusBarStyle('light');
+			}, 50);
+			// #endif
 		},
 		onLoad(option) {
 			if (option) {
@@ -110,6 +121,14 @@
 			}
 			this.setCurrentPage(this);
 			this.init();
+
+			// 强制设置状态栏样式
+			// #ifdef APP-PLUS
+			setTimeout(() => {
+				plus.navigator.setStatusBarBackground('transparent');
+				plus.navigator.setStatusBarStyle('light');
+			}, 100);
+			// #endif
 		},
 		methods: {
 			async init() {
@@ -211,6 +230,22 @@
 	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 	position: relative;
 	overflow: hidden;
+	/* 确保背景覆盖整个屏幕包括状态栏 */
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}
+
+/* 状态栏占位区域 */
+.status-bar-placeholder {
+	height: var(--status-bar-height);
+	width: 100%;
+	background: transparent;
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 1;
 }
 
 /* 顶部装饰 */
@@ -264,6 +299,8 @@
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
+	/* 使用状态栏高度变量，确保内容不被遮挡 */
+	padding-top: calc(var(--spacing-2xl) + var(--status-bar-height));
 }
 
 /* Logo区域 */

@@ -223,7 +223,6 @@ class ServiceBase {
 				if (Session.getToken()) {
 					request.header.Authorization = Session.getToken()
 				}
-				uni.showNavigationBarLoading()
 				if (request.data['redirecturl']) {
 					Session.setRedirecturl(request.data['redirecturl']);
 					delete request.data['redirecturl'];
@@ -240,7 +239,6 @@ class ServiceBase {
 					return
 				}
 				response.responseTimestamp = new Date().getTime()
-				uni.hideNavigationBarLoading()
 				if (response.data.code == 401||response.data.status == 401) {
 					Session.clearUser();
 					uni.reLaunch({
@@ -250,7 +248,6 @@ class ServiceBase {
 				return response;
 			},
 			responseError: (responseError) => {
-				uni.hideNavigationBarLoading()
 				return responseError;
 			},
 		}]

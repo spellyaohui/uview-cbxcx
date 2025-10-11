@@ -2,7 +2,7 @@
 	"pages": [{
 			"path": "pages/index",
 			"style": {
-				"navigationBarTitleText": "程序登录"
+				"navigationStyle": "custom"
 			}
 		},
 		{
@@ -16,13 +16,17 @@
 		{
 			"path": "pages/report",
 			"style": {
-				"navigationBarTitleText": "电子报告"
+				"navigationBarTitleText": "电子报告",
+				"navigationBarBackgroundColor": "#0796c1",
+				"navigationStyle": "custom"
 			}
 		},
 		{
 			"path": "pages/myreport",
 			"style": {
-				"navigationBarTitleText": "我的报告"
+				"navigationBarTitleText": "我的报告",
+				"navigationBarBackgroundColor": "#0796c1",
+				"navigationStyle": "custom"
 			}
 		},
 		{
@@ -43,7 +47,6 @@
 					"popGesture": "none",
 					"animationType": "fade-in",
 					"animationDuration": 200
-
 				}
 			}
 		}
@@ -51,6 +54,7 @@
 	"globalStyle": {
 		"navigationBarTextStyle": "white",
 		"navigationBarTitleText": "崔博小程序",
-		"navigationBarBackgroundColor": "#07c160"
+		"navigationBarBackgroundColor": "#07c160",
+		"backgroundColor": "#ffffff"
 	}
 }

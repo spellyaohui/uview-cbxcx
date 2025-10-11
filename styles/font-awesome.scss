@@ -1,17 +1,17 @@
-/* Font Awesome 图标字体样式 */
+/* Font Awesome 5 Free - 本地图标字体解决方案 */
+
+/* 字体声明 - 使用本地下载的字体文件 */
 @font-face {
   font-family: 'Font Awesome 5 Free';
   font-style: normal;
   font-weight: 900;
-  src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/webfonts/fa-solid-900.eot');
-  src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/webfonts/fa-solid-900.eot?#iefix') format('embedded-opentype'),
-       url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/webfonts/fa-solid-900.woff2') format('woff2'),
-       url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/webfonts/fa-solid-900.woff') format('woff'),
-       url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/webfonts/fa-solid-900.ttf') format('truetype'),
-       url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/webfonts/fa-solid-900.svg#fontawesome') format('svg');
-  font-display: swap; /* 优化字体加载 */
+  src: url('/static/fonts/fa-solid-900.woff2') format('woff2'),
+       url('/static/fonts/fa-solid-900.woff') format('woff'),
+       url('/static/fonts/fa-solid-900.ttf') format('truetype');
+  font-display: swap;
 }
 
+/* 基础图标样式 */
 .fas {
   font-family: 'Font Awesome 5 Free', sans-serif;
   font-weight: 900;
@@ -22,10 +22,11 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   display: inline-block;
-  min-width: 1em; /* 确保图标有最小宽度 */
+  min-width: 1em;
+  text-align: center;
 }
 
-/* 常用图标定义 */
+/* Font Awesome图标定义 - 使用Unicode编码 */
 .fa-arrow-left::before { content: "\f060"; }
 .fa-search::before { content: "\f002"; }
 .fa-user::before { content: "\f007"; }
@@ -64,3 +65,59 @@
 .fa-heart::before { content: "\f004"; }
 .fa-thumbs-up::before { content: "\f164"; }
 .fa-thumbs-down::before { content: "\f165"; }
+
+/* 备用图标方案 - 当字体文件加载失败时使用 */
+@font-face {
+  font-family: 'Font Awesome 5 Fallback';
+  src: local('Arial'), local('sans-serif');
+}
+
+.fallback-icon {
+  font-family: 'Font Awesome 5 Fallback', sans-serif;
+  display: inline-block;
+  text-align: center;
+}
+
+/* Unicode备用图标 - 用于字体加载失败的场景 */
+.font-loading-error .fas {
+  font-family: sans-serif !important;
+}
+
+.font-loading-error .fa-arrow-left::before { content: "←"; }
+.font-loading-error .fa-search::before { content: "🔍"; }
+.font-loading-error .fa-user::before { content: "👤"; }
+.font-loading-error .fa-user-circle::before { content: "👤"; }
+.font-loading-error .fa-qrcode::before { content: "📱"; }
+.font-loading-error .fa-list::before { content: "📋"; }
+.font-loading-error .fa-cogs::before { content: "⚙"; }
+.font-loading-error .fa-inbox::before { content: "📥"; }
+.font-loading-error .fa-times::before { content: "✕"; }
+.font-loading-error .fa-sync-alt::before { content: "🔄"; }
+.font-loading-error .fa-folder::before { content: "📁"; }
+.font-loading-error .fa-file-alt::before { content: "📄"; }
+.font-loading-error .fa-ellipsis-v::before { content: "⋮"; }
+.font-loading-error .fa-download::before { content: "⬇"; }
+.font-loading-error .fa-trash::before { content: "🗑"; }
+.font-loading-error .fa-exclamation-triangle::before { content: "⚠"; }
+.font-loading-error .fa-chevron-right::before { content: "›"; }
+.font-loading-error .fa-sign-out-alt::before { content: "🚪"; }
+.font-loading-error .fa-sun::before { content: "☀"; }
+.font-loading-error .fa-moon::before { content: "🌙"; }
+.font-loading-error .fa-lock::before { content: "🔒"; }
+.font-loading-error .fa-home::before { content: "🏠"; }
+.font-loading-error .fa-check::before { content: "✓"; }
+.font-loading-error .fa-camera::before { content: "📷"; }
+.font-loading-error .fa-photo::before { content: "🖼"; }
+.font-loading-error .fa-clock::before { content: "🕐"; }
+.font-loading-error .fa-calendar::before { content: "📅"; }
+.font-loading-error .fa-phone::before { content: "📞"; }
+.font-loading-error .fa-envelope::before { content: "✉"; }
+.font-loading-error .fa-map-marker-alt::before { content: "📍"; }
+.font-loading-error .fa-edit::before { content: "✏"; }
+.font-loading-error .fa-save::before { content: "💾"; }
+.font-loading-error .fa-print::before { content: "🖨"; }
+.font-loading-error .fa-share::before { content: "🔗"; }
+.font-loading-error .fa-star::before { content: "⭐"; }
+.font-loading-error .fa-heart::before { content: "❤"; }
+.font-loading-error .fa-thumbs-up::before { content: "👍"; }
+.font-loading-error .fa-thumbs-down::before { content: "👎"; }

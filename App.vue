@@ -277,7 +277,7 @@
 	// 引入现代化UI样式
 	@import 'styles/modern-ui.scss';
 
-	// 引入Font Awesome图标样式
+	// 引入Font Awesome图标样式（本地图标字体解决方案）
 	@import 'styles/font-awesome.scss';
 
 	// 保留必要的自定义样式（移除diy相关引用）

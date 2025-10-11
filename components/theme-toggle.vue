@@ -5,8 +5,8 @@
 				<text class="fas" :class="isDarkMode ? 'fa-sun' : 'fa-moon'"></text>
 			</view>
 			<view class="theme-text">
-				<text class="theme-label">{{ isDarkMode ? '浅色模式' : '黑暗模式' }}</text>
-				<text class="theme-desc">{{ isDarkMode ? '切换到浅色主题' : '切换到深色主题' }}</text>
+				<text class="theme-label">{{ themeLabel }}</text>
+				<text class="theme-desc">{{ themeDesc }}</text>
 			</view>
 			<view class="theme-switch">
 				<view class="switch-track" :class="{ active: isDarkMode }">
@@ -25,18 +25,52 @@ import themeMixin from '@/mixins/theme.js';
 export default {
 	name: 'ThemeToggle',
 	mixins: [themeMixin],
+	computed: {
+		themeLabel() {
+			return this.isDarkMode ? '浅色模式' : '深色模式';
+		},
+		themeDesc() {
+			return this.isDarkMode ? '切换到浅色主题' : '切换到深色主题';
+		}
+	},
 	methods: {
 		toggleTheme() {
 			// 调用App.vue的主题切换方法
 			const app = getApp();
 			if (app && app.toggleTheme) {
 				app.toggleTheme();
-				this.updateThemeStatus();
+
+				// 重新获取主题状态
+				this.$nextTick(() => {
+					if (this.updateThemeStatus) {
+						this.updateThemeStatus();
+					}
+				});
 
 				// 触觉反馈
 				// #ifdef APP-PLUS
-				plus.device.vibrate(8);
+				if (typeof plus !== 'undefined' && plus.device) {
+					plus.device.vibrate(8);
+				}
 				// #endif
+
+				// 强制触发页面重新渲染
+				// #ifdef APP-PLUS
+				setTimeout(() => {
+					const pages = getCurrentPages();
+					const currentPage = pages[pages.length - 1];
+					if (currentPage && currentPage.$vm && currentPage.$vm.$forceUpdate) {
+						currentPage.$vm.$forceUpdate();
+					}
+				}, 100);
+				// #endif
+
+				// 显示提示
+				uni.showToast({
+					title: this.isDarkMode ? '已切换到深色主题' : '已切换到浅色主题',
+					icon: 'none',
+					duration: 1500
+				});
 			}
 		}
 	}
@@ -125,6 +159,7 @@ export default {
 	border-color: var(--primary-color);
 }
 
+
 .switch-thumb {
 	width: 42rpx;
 	height: 42rpx;
@@ -144,6 +179,7 @@ export default {
 	left: 54rpx;
 	background: white;
 }
+
 
 .switch-icon {
 	font-size: 20rpx;

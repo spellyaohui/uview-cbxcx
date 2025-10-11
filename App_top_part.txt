@@ -1,0 +1,10 @@
+﻿	import themeManager from '@/utils/theme.js';
+
+	export default {
+		globalData: {
+			userInfo: null,
+			tabBar: [],
+			homePage: '/pages/index',
+			pages: ['/pages/index', '/pages/home', '/pages/report', '/pages/myreport'],
+			userData: {},
+			// 娣诲姞涓婚鐘舵€?			isDarkMode: false,

@@ -88,6 +88,7 @@ import Session from '@/common/Session.js'
 // 引入uView Plus
 import uviewPlus from 'uview-plus'
 import Auth from './common/Auth'
+import store from './store/index'
 
 import {
 	createSSRApp
@@ -104,6 +105,15 @@ export function createApp() {
 	app.config.globalProperties.$http = new HttpService()
 	app.config.globalProperties.$session = Session
 	app.config.globalProperties.$auth = Auth
+	app.config.globalProperties.$store = store
+
+	// 初始化主题
+	store.initTheme();
+
+	// 确保App端支持深色模式
+	// #ifdef APP-PLUS
+	plus.nativeUI.setUIStyle('auto');
+	// #endif
 
 	uni.getSystemInfo({
 		success: function(e) {

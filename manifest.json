@@ -10,7 +10,9 @@
         "safearea" : {
             "bottom" : {
                 "offset" : "none"
-            }
+            },
+            "background" : "#ffffff",
+            "backgroundDark" : "#1a1a1a"
         },
         "usingComponents" : true,
         "nvueStyleCompiler" : "uni-app",
@@ -54,12 +56,14 @@
                     "<uses-permission android:name=\"android.permission.WRITE_SETTINGS\"/>"
                 ],
                 "schemes" : "spellcuibo",
-                "minSdkVersion" : 21
+                "minSdkVersion" : 21,
+                "defaultNightMode" : "auto"
             },
             /* ios打包配置 */
             "ios" : {
                 "dSYMs" : false,
-                "urltypes" : "spellcuibo"
+                "urltypes" : "spellcuibo",
+                "defaultTheme" : "auto"
             },
             /* SDK配置 */
             "sdkConfigs" : {

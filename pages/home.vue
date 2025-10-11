@@ -14,10 +14,17 @@
 			<view class="welcome-card modern-card fade-in-up">
 				<view class="welcome-header">
 					<view class="welcome-avatar">
-						<text class="fas fa-user-circle"></text>
+						<image
+							v-if="userAvatarUrl"
+							:src="userAvatarUrl"
+							class="avatar-image"
+							mode="aspectFill"
+							@error="onAvatarError"
+						></image>
+						<text v-else class="fas fa-user-circle"></text>
 					</view>
 					<view class="welcome-info">
-						<view class="welcome-title">您好，欢迎回来！</view>
+						<view class="welcome-title">{{ displayName }}您好，欢迎回来！</view>
 						<view class="welcome-desc">专业的健康管理服务</view>
 					</view>
 				</view>
@@ -98,8 +105,8 @@
 							<text class="fas fa-user"></text>
 						</view>
 						<view class="action-content">
-							<view class="action-title">我的收藏</view>
-							<view class="action-desc">查看收藏的报告</view>
+							<view class="action-title">我的报告</view>
+							<view class="action-desc">查看可以下载的报告</view>
 						</view>
 						<view class="action-arrow">
 							<text class="fas fa-chevron-right"></text>
@@ -112,10 +119,17 @@
 			<view class="user-card modern-card">
 				<view class="user-header">
 					<view class="user-avatar">
-						<text class="fas fa-user-circle"></text>
+						<image
+							v-if="userAvatarUrl"
+							:src="userAvatarUrl"
+							class="avatar-image"
+							mode="aspectFill"
+							@error="onAvatarError"
+						></image>
+						<text v-else class="fas fa-user-circle"></text>
 					</view>
 					<view class="user-info">
-						<view class="user-name">{{ userInfo.username || '用户' }}</view>
+						<view class="user-name">{{ userInfo.name || userInfo.username || '用户' }}</view>
 						<view class="user-status">在线</view>
 					</view>
 				</view>
@@ -163,8 +177,18 @@
 				stats: {
 					totalReports: 0,
 					todayReports: 0
-				}
+				},
+				// 随机头像URL
+				userAvatarUrl: '',
+				// 备用头像源
+				backupAvatars: []
 			};
+		},
+		computed: {
+			// 显示名称的计算属性
+			displayName() {
+				return this.userInfo.name || this.userInfo.username || '用户';
+			}
 		},
 		onBackPress(e) {
 			// 防止重复调用
@@ -215,17 +239,90 @@
 				const userData = this.$session.getUser();
 				if (userData) {
 					this.userInfo = userData;
+					// 生成随机头像
+					this.generateRandomAvatar();
 				}
+			},
+
+			// 生成随机头像
+			generateRandomAvatar() {
+				// 使用多个头像源以确保随机性和可用性
+				const avatarSources = [
+					`https://api.dicebear.com/7.x/avataaars/svg?seed=${Date.now()}&backgroundColor=b6e3f4,c0aede,d1d4f9`,
+					`https://api.dicebear.com/7.x/fun-emoji/svg?seed=${Date.now()}&backgroundColor=b6e3f4,c0aede,d1d4f9`,
+					`https://api.dicebear.com/7.x/bottts/svg?seed=${Date.now()}&backgroundColor=b6e3f4,c0aede,d1d4f9`,
+					`https://robohash.org/${Date.now()}?set=set4&size=200x200`,
+					`https://i.pravatar.cc/200?img=${Math.floor(Math.random() * 70) + 1}`,
+					`https://api.multiavatar.com/${Date.now()}.png`
+				];
+
+				// 保存备用头像列表
+				this.backupAvatars = [...avatarSources];
+
+				// 随机选择一个头像源
+				const randomIndex = Math.floor(Math.random() * avatarSources.length);
+				const selectedAvatar = avatarSources[randomIndex];
+
+				console.log('选择的头像URL:', selectedAvatar);
+				this.userAvatarUrl = selectedAvatar;
+			},
+
+			// 头像加载错误处理
+			onAvatarError(e) {
+				console.log('头像加载失败，尝试使用备用头像:', e);
+
+				// 如果有备用头像，尝试下一个
+				if (this.backupAvatars.length > 1) {
+					// 移除当前失败的头像
+					const currentIndex = this.backupAvatars.indexOf(this.userAvatarUrl);
+					if (currentIndex > -1) {
+						this.backupAvatars.splice(currentIndex, 1);
+					}
+
+					// 使用下一个备用头像
+					if (this.backupAvatars.length > 0) {
+						const nextAvatar = this.backupAvatars[0];
+						console.log('尝试备用头像:', nextAvatar);
+						this.userAvatarUrl = nextAvatar;
+						return;
+					}
+				}
+
+				// 如果所有头像都失败，清空URL显示默认图标
+				console.log('所有头像源都失败，使用默认图标');
+				this.userAvatarUrl = '';
 			},
 
 			// 加载统计数据
 			async loadStats() {
-				// 这里可以调用API获取统计数据
-				// 暂时使用模拟数据
-				this.stats = {
-					totalReports: Math.floor(Math.random() * 100) + 20,
-					todayReports: Math.floor(Math.random() * 10) + 1
-				};
+				try {
+					// 调用API获取报告统计数据
+					const response = await this.$http.post('/dzbg/getreportjs', {}, {
+						'Content-Type': 'application/json'
+						// Authorization请求头会自动由ServiceBase.js中的拦截器添加
+					}, 'json');
+					
+					if (response.code === 200) {
+						this.stats = {
+							totalReports: response.allJS || 0,
+							todayReports: response.dataJS || 0
+						};
+					} else {
+						console.error('获取报告统计数据失败:', response);
+						// 如果API调用失败，使用默认值
+						this.stats = {
+							totalReports: 0,
+							todayReports: 0
+						};
+					}
+				} catch (error) {
+					console.error('获取报告统计数据出错:', error);
+					// 如果发生异常，使用默认值
+					this.stats = {
+						totalReports: 0,
+						todayReports: 0
+					};
+				}
 			},
 
 			// 提交白名单 API请求方法
@@ -443,6 +540,13 @@
 	align-items: center;
 	justify-content: center;
 	margin-right: var(--spacing-md);
+	overflow: hidden;
+
+	.avatar-image {
+		width: 100%;
+		height: 100%;
+		border-radius: 50%;
+	}
 
 	.fas {
 		font-size: 48rpx;
@@ -607,6 +711,13 @@
 	align-items: center;
 	justify-content: center;
 	margin-right: var(--spacing-md);
+	overflow: hidden;
+
+	.avatar-image {
+		width: 100%;
+		height: 100%;
+		border-radius: 50%;
+	}
 
 	.fas {
 		font-size: 36rpx;

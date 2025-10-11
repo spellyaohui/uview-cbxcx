@@ -13,9 +13,9 @@
 			// 添加主题管理器
 			themeManager: themeManager
 		},
-		onLaunch() {
-			// 初始化主题管理器
-			this.initThemeManager();
+		async onLaunch() {
+			// 初始化主题管理器（等待API调用完成）
+			await this.initThemeManager();
 
 			// 获取状态栏高度并设置全局变量
 			this.setStatusBarHeight();
@@ -198,18 +198,80 @@
 			}, 2000);
 		},
 
+		onThemeChange({ theme }) {
+			// 当系统主题发生变化时，同步更新全局主题状态
+			const isDark = theme === 'dark';
+			this.globalData.isDarkMode = isDark;
+
+			// 更新主题管理器状态
+			if (this.globalData.themeManager) {
+				this.globalData.themeManager.currentTheme = theme;
+				this.globalData.themeManager.isDarkMode = isDark;
+			}
+
+			// 更新body类以应用主题
+			// #ifdef H5
+			this.$nextTick(() => {
+				if (typeof document !== 'undefined' && document.body) {
+					if (isDark) {
+						document.body.classList.add('theme-dark');
+						document.body.classList.remove('theme-light');
+						document.body.setAttribute('data-theme', 'dark');
+					} else {
+						document.body.classList.remove('theme-dark');
+						document.body.classList.add('theme-light');
+						document.body.setAttribute('data-theme', 'light');
+					}
+				}
+			});
+			// #endif
+
+			// 应用原生主题
+			// #ifdef APP-PLUS || H5
+			uni.setNavigationBarColor({
+				frontColor: isDark ? '#ffffff' : '#000000',
+				backgroundColor: isDark ? '#1a1a1a' : '#07c160',
+				animation: {
+					duration: 300,
+					timingFunc: 'easeIn'
+				}
+			});
+			// #endif
+
+			// 设置状态栏主题
+			// #ifdef APP-PLUS
+			if (typeof plus !== 'undefined' && plus.navigator) {
+				plus.navigator.setStatusBarStyle(isDark ? 'light' : 'dark');
+			}
+			// #endif
+
+			// 更新所有页面
+			this.updatePageThemeClass(isDark);
+		},
+
 		methods: {
 			// 初始化主题管理器
-			initThemeManager() {
-				// 初始化主题管理器
-				this.globalData.themeManager.init();
+			async initThemeManager() {
+				// 初始化主题管理器（通过API获取主题）
+				await this.globalData.themeManager.init();
 
 				// 同步主题状态到globalData
 				this.globalData.isDarkMode = this.globalData.themeManager.isCurrentDark();
 
+				// 立即应用主题到页面
+				this.updatePageThemeClass(this.globalData.isDarkMode);
+
 				// 监听主题变化并同步到globalData
 				uni.$on('themeChange', ({ theme, isDark }) => {
 					this.globalData.isDarkMode = isDark;
+
+					// 立即应用主题到页面
+					this.updatePageThemeClass(isDark);
+
+					// 更新全局 store
+					if (this.$store && this.$store.updateTheme) {
+						this.$store.updateTheme(isDark, theme);
+					}
 				});
 			},
 
@@ -221,9 +283,60 @@
 
 			// 切换主题 - 使用主题管理器
 			toggleTheme() {
-				const newTheme = this.globalData.themeManager.toggleTheme();
+				const result = this.globalData.themeManager.toggleTheme();
 				this.globalData.isDarkMode = this.globalData.themeManager.isCurrentDark();
-				return newTheme;
+
+				// 更新全局 store
+				if (this.$store && this.$store.updateTheme) {
+					this.$store.updateTheme(this.globalData.isDarkMode, result.theme || result);
+				}
+
+				// 强制更新当前页面的主题类
+				this.updatePageThemeClass(this.globalData.isDarkMode);
+
+				return result;
+			},
+			
+			// 更新页面主题类
+			updatePageThemeClass(isDarkMode) {
+				// #ifdef H5
+				this.$nextTick(() => {
+					if (typeof document !== 'undefined' && document.body) {
+						if (isDarkMode) {
+							document.body.classList.add('theme-dark');
+							document.body.classList.remove('theme-light');
+							document.body.setAttribute('data-theme', 'dark');
+						} else {
+							document.body.classList.remove('theme-dark');
+							document.body.classList.add('theme-light');
+							document.body.setAttribute('data-theme', 'light');
+						}
+					}
+				});
+				// #endif
+				
+				// #ifdef APP-PLUS
+				if (typeof plus !== 'undefined') {
+					plus.navigator.setStatusBarStyle(isDarkMode ? 'light' : 'dark');
+				}
+				// #endif
+				
+				// 更新当前页面栈的页面
+				const pages = getCurrentPages();
+				pages.forEach(page => {
+					if (page && page.$vm) {
+						// 更新页面的数据
+						if (page.$vm.setData) {
+							// 小程序方式
+							page.$vm.setData({ isDarkMode });
+						} else {
+							// Vue 页面方式
+							if (page.$vm.isDarkMode !== undefined) {
+								page.$vm.isDarkMode = isDarkMode;
+							}
+						}
+					}
+				});
 			},
 
 			// 获取当前主题 - 使用主题管理器
@@ -271,9 +384,6 @@
 	};
 </script>
 <style lang="scss">
-	// 引入uView Plus样式
-	@import 'uview-plus/index.scss';
-
 	// 引入现代化UI样式
 	@import 'styles/modern-ui.scss';
 
@@ -292,6 +402,7 @@
 		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 		background-color: var(--bg-secondary);
 		color: var(--text-primary);
+		transition: background-color 0.3s ease, color 0.3s ease; // 添加平滑过渡效果
 	}
 
 	// 现代化容器
@@ -299,5 +410,25 @@
 		padding: var(--spacing-md);
 		min-height: 100vh;
 		background: var(--primary-gradient);
+		transition: background 0.3s ease; // 添加平滑过渡效果
+	}
+	
+	// 强制应用主题到根元素
+	:root {
+		--bg-primary: #ffffff;        /* 默认浅色模式 */
+		--bg-secondary: #f8fafc;      /* 默认浅色模式 */
+		--text-primary: #1f2937;      /* 默认浅色模式 */
+		--primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	}
+	
+	/* 深色模式的强制样式 */
+	.theme-dark {
+		--bg-primary: #1e293b;
+		--bg-secondary: #0f172a;
+		--text-primary: #f1f5f9;
+		--primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+		
+		background-color: var(--bg-secondary) !important;
+		color: var(--text-primary) !important;
 	}
 </style>

@@ -7,34 +7,43 @@ class ThemeManager {
 	}
 
 	// 初始化主题管理器
-	init() {
-		// 获取存储的主题
-		const savedTheme = uni.getStorageSync('theme');
-		const autoMode = uni.getStorageSync('themeAutoMode');
-		
-		if (savedTheme) {
-			// 如果已保存主题，使用它
+	async init() {
+		// 删除自动模式相关代码，只保留手动模式
+		console.log('初始化手动模式，将调用API获取主题...');
+
+		// 调用API获取主题状态
+		try {
+			const apiTheme = await this.fetchThemeFromAPI();
+			this.setTheme(apiTheme);
+		} catch (error) {
+			console.error('API调用失败，使用默认浅色主题:', error);
+			const savedTheme = uni.getStorageSync('theme') || 'light';
 			this.setTheme(savedTheme);
-		} else if (autoMode !== false) {
-			// 如果没有保存的主题但自动模式未关闭，使用系统主题
-			uni.getSystemInfo({
+		}
+	}
+
+	// 从API获取主题状态
+	async fetchThemeFromAPI() {
+		return new Promise((resolve, reject) => {
+			uni.request({
+				url: 'http://btpanelweb.wjtjyy.top:4000/api/day-night-status',
+				method: 'GET',
 				success: (res) => {
-					if (res.theme) {
-						this.setTheme(res.theme);
+					console.log('API调用成功，返回数据:', res);
+					if (res.statusCode === 200 && res.data && res.data.status) {
+						const apiTheme = res.data.status === 'dark' ? 'dark' : 'light';
+						console.log('API返回的主题状态:', apiTheme);
+						resolve(apiTheme);
+					} else {
+						console.error('API返回数据格式错误:', res);
+						reject(new Error('API返回数据格式错误'));
 					}
+				},
+				fail: (error) => {
+					console.error('API调用失败:', error);
+					reject(error);
 				}
 			});
-		} else {
-			// 如果自动模式被关闭，使用light主题
-			this.setTheme('light');
-		}
-
-		// 监听系统主题变化
-		uni.onThemeChange(({ theme }) => {
-			const autoMode = uni.getStorageSync('themeAutoMode');
-			if (autoMode !== false) {
-				this.setTheme(theme);
-			}
 		});
 	}
 
@@ -80,22 +89,35 @@ class ThemeManager {
 					page.$vm.onThemeChange(theme);
 				}
 
+				// 尝试更新页面的根数据
+				if (page.$vm.$data && typeof page.$vm.$data === 'object') {
+					page.$vm.$data.isDarkMode = this.isDarkMode;
+				}
+
 				// 强制页面重新渲染
 				if (page.$vm.$forceUpdate) {
 					page.$vm.$forceUpdate();
+				} else if (page.$vm.setData) {
+					// 兼容小程序 setData
+					page.$vm.setData({
+						isDarkMode: this.isDarkMode
+					});
 				}
 			}
 		});
 	}
 
-	// 切换主题
+	// 切换主题（手动切换）
 	toggleTheme() {
 		const newTheme = this.isDarkMode ? 'light' : 'dark';
 		this.setTheme(newTheme);
+		return { theme: newTheme, mode: 'manual' };
+	}
 
-		// 设置为手动模式
-		uni.setStorageSync('themeAutoMode', false);
-
+	// 强制切换主题（手动切换）
+	forceToggleTheme() {
+		const newTheme = this.isDarkMode ? 'light' : 'dark';
+		this.setTheme(newTheme);
 		return newTheme;
 	}
 
@@ -131,6 +153,21 @@ class ThemeManager {
 				console.error('主题监听器执行失败:', error);
 			}
 		});
+		
+		// 通过全局事件通知所有组件
+		uni.$emit('themeChange', { theme, isDark });
+		
+		// 更新全局状态
+		try {
+			const app = getApp();
+			if (app && app.$store && app.$store.updateTheme) {
+				app.$store.updateTheme(isDark, theme);
+			} else if (typeof uni !== 'undefined' && uni.$globalStore) {
+				uni.$globalStore.updateTheme(isDark, theme);
+			}
+		} catch (error) {
+			console.error('更新全局状态失败:', error);
+		}
 	}
 
 	// 获取主题对应的CSS变量值
@@ -241,21 +278,33 @@ class ThemeManager {
 			// 创建或更新全局样式
 			const styleId = 'theme-variables';
 			let styleElement = document.getElementById(styleId);
-			
+
 			if (!styleElement) {
 				styleElement = document.createElement('style');
 				styleElement.id = styleId;
 				document.head.appendChild(styleElement);
 			}
-			
+
 			// 构建CSS变量样式
 			let cssText = ':root {';
 			Object.keys(variables).forEach(key => {
 				cssText += `${key}: ${variables[key]};`;
 			});
 			cssText += '}';
-			
+
+			// 同时添加主题类样式
+			if (this.currentTheme === 'dark') {
+				cssText += '.theme-dark, [data-theme="dark"] {';
+				Object.keys(variables).forEach(key => {
+					cssText += `${key}: ${variables[key]};`;
+				});
+				cssText += '}';
+			}
+
 			styleElement.innerHTML = cssText;
+
+			// 立即更新body属性
+			this.updateBodyClass(this.currentTheme);
 		}
 		// #endif
 	}
@@ -273,11 +322,45 @@ class ThemeManager {
 			}
 		});
 		// #endif
-		
+
 		// 设置状态栏主题
 		// #ifdef APP-PLUS
-		plus.navigator.setStatusBarStyle(theme === 'dark' ? 'light' : 'dark');
+		if (typeof plus !== 'undefined' && plus.navigator) {
+			plus.navigator.setStatusBarStyle(theme === 'dark' ? 'light' : 'dark');
+		}
 		// #endif
+
+		// 强制设置原生UI样式
+		// #ifdef APP-PLUS
+		if (typeof plus !== 'undefined' && plus.nativeUI) {
+			plus.nativeUI.setUIStyle(theme === 'dark' ? 'dark' : 'light');
+		}
+		// #endif
+
+		// 在H5中更新body类
+		// #ifdef H5
+		this.updateBodyClass(theme);
+		// #endif
+
+		// 在App中更新body类
+		// #ifdef APP-PLUS
+		this.updateBodyClass(theme);
+		// #endif
+	}
+	
+	// 更新body类以应用主题
+	updateBodyClass(theme) {
+		if (typeof document !== 'undefined' && document.body) {
+			if (theme === 'dark') {
+				document.body.classList.remove('theme-light');
+				document.body.classList.add('theme-dark');
+				document.body.setAttribute('data-theme', 'dark');
+			} else {
+				document.body.classList.remove('theme-dark');
+				document.body.classList.add('theme-light');
+				document.body.setAttribute('data-theme', 'light');
+			}
+		}
 	}
 }
 
@@ -285,3 +368,4 @@ class ThemeManager {
 const themeManager = new ThemeManager();
 
 export default themeManager;
+

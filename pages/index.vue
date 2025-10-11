@@ -33,6 +33,7 @@
 						placeholder="请输入登录账户"
 						v-model="username"
 						placeholder-class="input-placeholder"
+						@confirm="handleLoginOnEnter"
 					/>
 				</view>
 
@@ -47,6 +48,7 @@
 						v-model="password"
 						password="true"
 						placeholder-class="input-placeholder"
+						@confirm="handleLoginOnEnter"
 					/>
 				</view>
 
@@ -167,6 +169,13 @@
 				}
 			},
 
+			// 回车键登录处理
+			handleLoginOnEnter() {
+				if (this.username && this.password) {
+					this.handleLogin();
+				}
+			},
+
 			// 用户登录 API请求方法
 			async logindataApi(param) {
 				let thiz = this;
@@ -191,7 +200,21 @@
 					return;
 				}
 				if (logindata.code == 200) {
-					this.$session.setUser(logindata.data);
+					// 处理用户数据，确保name字段被正确保存
+					const userData = logindata.data;
+					console.log('登录返回的用户数据:', userData);
+
+					// 确保数据结构包含必要字段
+					const processedUserData = {
+						...userData,
+						// 如果没有name字段但有username，则复制一份作为name
+						name: userData.name || userData.username || '用户',
+						username: userData.username || userData.lxdh || ''
+					};
+
+					console.log('处理后的用户数据:', processedUserData);
+
+					this.$session.setUser(processedUserData);
 					uni.showToast({
 						title: '登录成功',
 						icon: 'success',

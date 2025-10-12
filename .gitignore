@@ -1,6 +1,9 @@
-# Claude 指导文件
+# Claude 指导文件和缓存
 CLAUDE.md
 .claude/
+.claude/**/*
+.claude-cache/
+.claude-cache/**/*
 
 # 依赖目录
 node_modules/

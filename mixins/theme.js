@@ -14,6 +14,11 @@ export default {
 		uni.$on('themeChange', this.handleThemeChange);
 	},
 
+	onShow() {
+		// 页面显示时获取最新的主题设置
+		this.updateThemeFromAPI();
+	},
+
 	beforeDestroy() {
 		// 移除主题变化监听
 		uni.$off('themeChange', this.handleThemeChange);
@@ -41,6 +46,23 @@ export default {
 		onThemeChange(theme) {
 			// 子组件可以重写此方法来响应主题变化
 			console.log('页面主题变化:', theme);
+		},
+
+		// 从API更新主题
+		async updateThemeFromAPI() {
+			try {
+				const app = getApp();
+				if (app && app.globalData && app.globalData.themeManager) {
+					// 调用主题管理器的fetchThemeFromAPI方法
+					const apiTheme = await app.globalData.themeManager.fetchThemeFromAPI();
+					if (apiTheme) {
+						// 设置新的主题
+						app.globalData.themeManager.setTheme(apiTheme);
+					}
+				}
+			} catch (error) {
+				console.error('从API更新主题失败:', error);
+			}
 		}
 	}
 };

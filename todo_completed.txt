@@ -1,0 +1,9 @@
+已完成以下修改：
+
+1. 在 data() 中添加了 wxNotification 变量
+2. 在 methods 中添加了 toggleWxNotification 方法
+3. 在 HTML 模板中添加了复选框，确保只在报告状态为"部分"时显示
+4. 更新了 tjbgjcApi 和 tjbgzzApi 方法以传递 notNotifyWx 参数
+5. 添加了复选框所需的 CSS 样式
+
+所有功能都已实现，复选框会在部分报告监测界面中显示，并将正确的参数传递给后端 API。

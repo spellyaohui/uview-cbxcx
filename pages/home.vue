@@ -216,8 +216,9 @@
 		},
 		onShow() {
 			this.setCurrentPage(this);
-			// 刷新用户信息
+			// 刷新用户信息和统计数据
 			this.loadUserInfo();
+			this.loadStats();
 		},
 		onLoad(option) {
 			if (option) {
@@ -246,14 +247,18 @@
 
 			// 生成随机头像
 			generateRandomAvatar() {
-				// 使用多个头像源以确保随机性和可用性
+				// 使用更稳定和可靠的头像服务(DiceBear 8.x, Robohash, Gravatar)，使用PNG格式以提高兼容性
 				const avatarSources = [
-					`https://api.dicebear.com/7.x/avataaars/svg?seed=${Date.now()}&backgroundColor=b6e3f4,c0aede,d1d4f9`,
-					`https://api.dicebear.com/7.x/fun-emoji/svg?seed=${Date.now()}&backgroundColor=b6e3f4,c0aede,d1d4f9`,
-					`https://api.dicebear.com/7.x/bottts/svg?seed=${Date.now()}&backgroundColor=b6e3f4,c0aede,d1d4f9`,
-					`https://robohash.org/${Date.now()}?set=set4&size=200x200`,
-					`https://i.pravatar.cc/200?img=${Math.floor(Math.random() * 70) + 1}`,
-					`https://api.multiavatar.com/${Date.now()}.png`
+					// DiceBear 8.x 版本 - 使用 initial, bottts, avataaars, big-ears 等样式，PNG格式，较小尺寸
+					`https://api.dicebear.com/8.x/initials/png?seed=${Date.now()}&backgroundColor=b6e3f4,c0aede,d1d4f9&size=100`,
+					`https://api.dicebear.com/8.x/bottts/png?seed=${Date.now()}&backgroundColor=b6e3f4,c0aede,d1d4f9&size=100`,
+					`https://api.dicebear.com/8.x/avataaars/png?seed=${Date.now()}&backgroundColor=b6e3f4,c0aede,d1d4f9&size=100`,
+					`https://api.dicebear.com/8.x/big-ears/png?seed=${Date.now()}&backgroundColor=b6e3f4,c0aede,d1d4f9&size=100`,
+					`https://api.dicebear.com/8.x/big-smile/png?seed=${Date.now()}&backgroundColor=b6e3f4,c0aede,d1d4f9&size=100`,
+					// Robohash 服务，PNG格式，较小尺寸
+					`https://robohash.org/${Date.now()}?set=set4&size=100x100&bgset=bg1`,
+					// Gravatar 服务，较小尺寸
+					`https://www.gravatar.com/avatar/${Date.now()}?s=100&d=identicon&r=g`
 				];
 
 				// 保存备用头像列表
@@ -307,6 +312,13 @@
 							totalReports: response.allJS || 0,
 							todayReports: response.dataJS || 0
 						};
+					} else if (response.code === 301) {
+						this.$session.clearUser();
+						this.showToast('请先登录');
+						uni.reLaunch({
+							url: '/pages/index'
+						});
+						return;
 					} else {
 						console.error('获取报告统计数据失败:', response);
 						// 如果API调用失败，使用默认值

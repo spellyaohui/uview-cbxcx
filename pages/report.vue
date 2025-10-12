@@ -212,16 +212,26 @@
 							/>
 						</view>
 
+						<!-- 不通知微信复选框 -->
+						<view class="checkbox-container">
+							<view class="checkbox-wrapper" @click="toggleCheckbox">
+								<view class="checkbox-visual" :class="{ checked: wxNotification }">
+									<text class="checkbox-icon" v-if="wxNotification">✓</text>
+								</view>
+								<text class="checkbox-text">不通知微信</text>
+							</view>
+						</view>
+
 						<view class="modal-actions">
 							<button
 								class="modern-btn modern-btn-error"
-								@click="() => navigateTo({ type: 'tjbgjcApi', reportid: globalData.m_reportid, reportpeople: input_bgfsr })"
+								@click="() => navigateTo({ type: 'tjbgjcApi', reportid: globalData.m_reportid, reportpeople: input_bgfsr, notNotifyWx: wxNotification })"
 							>
 								部分报告监测
 							</button>
 							<button
 								class="modern-btn modern-btn-success"
-								@click="() => navigateTo({ type: 'tjbgzzApi', reportid: globalData.m_reportid })"
+								@click="() => navigateTo({ type: 'tjbgzzApi', reportid: globalData.m_reportid, notNotifyWx: wxNotification })"
 							>
 								报告制作
 							</button>
@@ -272,6 +282,7 @@
 				scaninput_smcxFocus: false,
 				modal_bgcl: '',
 				input_bgfsr: '',
+				wxNotification: false, // 不通知微信，默认为 false（即通知微信）
 				searching: false,
 				hasSearched: false,
 				totalCount: 0
@@ -279,6 +290,7 @@
 		},
 		onShow() {
 			this.setCurrentPage(this);
+			this.updateThemeFromAPI();
 		},
 		onLoad(option) {
 			if (option) {
@@ -444,7 +456,8 @@
 				let http_url = '/dzbg/tjbgjc';
 				let http_data = {
 					reportid: param.reportid || this.globalData.m_reportid,
-					reportpeople: param.reportpeople || this.input_bgfsr
+					reportpeople: param.reportpeople || this.input_bgfsr,
+					notNotifyWx: param.notNotifyWx || this.wxNotification
 				};
 				let http_header = {
 					'Content-Type': 'application/json'
@@ -502,7 +515,8 @@
 				// 请求地址及请求数据
 				let http_url = '/dzbg/tjbgzz';
 				let http_data = {
-					reportid: param.reportid || this.globalData.m_reportid
+					reportid: param.reportid || this.globalData.m_reportid,
+					notNotifyWx: param.notNotifyWx || this.wxNotification
 				};
 				let http_header = {
 					'Content-Type': 'application/json'
@@ -606,6 +620,32 @@
 			closeModal_bgcl() {
 				this.modal_bgcl = '';
 				this.input_bgfsr = '';
+				this.wxNotification = false; // 重置复选框状态
+			},
+			
+			// 切换复选框状态
+			toggleCheckbox() {
+				this.wxNotification = !this.wxNotification;
+				console.log('复选框状态:', this.wxNotification);
+				// 强制更新视图
+				this.$forceUpdate();
+			},
+
+			// 从API更新主题
+			async updateThemeFromAPI() {
+			  try {
+			    const app = getApp();
+			    if (app && app.globalData && app.globalData.themeManager) {
+			      // 调用主题管理器的fetchThemeFromAPI方法
+			      const apiTheme = await app.globalData.themeManager.fetchThemeFromAPI();
+			      if (apiTheme) {
+			        // 设置新的主题
+			        app.globalData.themeManager.setTheme(apiTheme);
+			      }
+			    }
+			  } catch (error) {
+			    console.error('从API更新主题失败:', error);
+			  }
 			}
 		},
 
@@ -1170,5 +1210,89 @@
 	.report-actions {
 		padding: var(--spacing-md);
 	}
+}
+
+/* 复选框容器 */
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  width: 100%;
+}
+
+.checkbox-visual {
+  width: 36rpx;
+  height: 36rpx;
+  background: var(--bg-primary) !important;
+  border: 2rpx solid var(--border-color) !important;
+  border-radius: 6rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  margin-right: var(--spacing-md);
+  flex-shrink: 0;
+}
+
+.checkbox-visual.checked {
+  background: #2563eb !important;
+  border-color: #1e40af !important;
+}
+
+/* 确保未选中状态的边框颜色正确 */
+.checkbox-visual:not(.checked) {
+  background: var(--bg-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.checkbox-icon {
+  color: #ffffff;
+  font-size: 20rpx;
+  font-weight: bold;
+  line-height: 1;
+  display: block;
+}
+
+.checkbox-text {
+  font-size: 28rpx;
+  color: var(--text-primary);
+  font-weight: 500;
+  user-select: none;
+  flex: 1;
+}
+
+.checkbox-container:hover {
+  background: var(--bg-secondary);
+  border-color: var(--primary-color);
+}
+
+.checkbox-container:hover .checkbox-visual {
+  border-color: var(--primary-color);
+  transform: scale(1.05);
+}
+
+/* hover状态下，未选中的复选框保持主题边框色 */
+.checkbox-container:hover .checkbox-visual:not(.checked) {
+  border-color: var(--primary-color) !important;
+}
+
+/* hover状态下，选中的复选框保持深蓝色边框 */
+.checkbox-container:hover .checkbox-visual.checked {
+  border-color: #1e40af !important;
+}
+
+.checkbox-wrapper:active .checkbox-visual {
+  transform: scale(0.95);
 }
 </style>

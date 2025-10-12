@@ -294,8 +294,6 @@
 			this.setCurrentPage(this);
 			// 重新加载数据，确保从其他页面返回时数据是最新的
 			this.init();
-			// 页面显示时获取最新的主题设置
-			this.updateThemeFromAPI();
 		},
 		onLoad(option) {
 			if (option) {
@@ -403,7 +401,7 @@
 			viewReportDetails(item) {
 				uni.showModal({
 					title: '报告详情',
-					content: `报告名称：${item.PATHNAME}\\n接收人：${item.note}\\n提交时间：${item.date}\\n报告ID：${item.cxid}`,
+					content: `报告名称：${item.PATHNAME}\n接收人：${item.note}\n提交时间：${item.date}\n报告ID：${item.cxid}`,
 					showCancel: false
 				});
 			},
@@ -713,23 +711,6 @@
 						return '下载失败';
 					default:
 						return '准备中';
-				}
-			},
-
-			// 从API更新主题
-			async updateThemeFromAPI() {
-				try {
-					const app = getApp();
-					if (app && app.globalData && app.globalData.themeManager) {
-						// 调用主题管理器的fetchThemeFromAPI方法
-						const apiTheme = await app.globalData.themeManager.fetchThemeFromAPI();
-						if (apiTheme) {
-							// 设置新的主题
-							app.globalData.themeManager.setTheme(apiTheme);
-						}
-					}
-				} catch (error) {
-					console.error('从API更新主题失败:', error);
 				}
 			},
 

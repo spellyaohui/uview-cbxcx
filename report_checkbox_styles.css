@@ -1,0 +1,23 @@
+/* 复选框容器 */
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-md) 0;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.checkbox-input {
+  width: 36rpx;
+  height: 36rpx;
+  margin-right: var(--spacing-sm);
+}
+
+.checkbox-text {
+  font-size: 28rpx;
+  color: var(--text-primary);
+}

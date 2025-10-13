@@ -721,10 +721,16 @@
 				try {
 					const app = getApp();
 					if (app && app.globalData && app.globalData.themeManager) {
+						// 检查用户是否已经手动设置了主题
+						if (app.globalData.themeManager.isUserManualMode()) {
+							console.log('用户已手动设置主题，跳过API更新');
+							return;
+						}
+
 						// 调用主题管理器的fetchThemeFromAPI方法
 						const apiTheme = await app.globalData.themeManager.fetchThemeFromAPI();
 						if (apiTheme) {
-							// 设置新的主题
+							// 设置新的主题（不会标记为用户手动设置）
 							app.globalData.themeManager.setTheme(apiTheme);
 						}
 					}

@@ -8,18 +8,21 @@ class ThemeManager {
 
 	// 初始化主题管理器
 	async init() {
-		// 删除自动模式相关代码，只保留手动模式
-		console.log('初始化手动模式，将调用API获取主题...');
+		console.log('初始化主题管理器，冷启动时以API状态为准...');
 
-		// 调用API获取主题状态
+		// 冷启动时始终调用API获取主题状态
 		try {
 			const apiTheme = await this.fetchThemeFromAPI();
+			console.log('冷启动使用API返回的主题:', apiTheme);
 			this.setTheme(apiTheme);
 		} catch (error) {
-			console.error('API调用失败，使用默认浅色主题:', error);
-			const savedTheme = uni.getStorageSync('theme') || 'light';
-			this.setTheme(savedTheme);
+			console.error('API调用失败，使用本地存储的主题:', error);
+			// 只有API失败时才使用本地存储的主题
+			const savedTheme = uni.getStorageSync('theme');
+			this.setTheme(savedTheme || 'light');
 		}
+
+		// 注意：冷启动时不检查user_theme，确保每次都以API状态初始化
 	}
 
 	// 从API获取主题状态
@@ -111,6 +114,11 @@ class ThemeManager {
 	toggleTheme() {
 		const newTheme = this.isDarkMode ? 'light' : 'dark';
 		this.setTheme(newTheme);
+
+		// 标记这是用户手动设置的主题
+		uni.setStorageSync('user_theme', newTheme);
+		console.log('用户手动切换主题:', newTheme);
+
 		return { theme: newTheme, mode: 'manual' };
 	}
 
@@ -118,6 +126,11 @@ class ThemeManager {
 	forceToggleTheme() {
 		const newTheme = this.isDarkMode ? 'light' : 'dark';
 		this.setTheme(newTheme);
+
+		// 标记这是用户手动设置的主题
+		uni.setStorageSync('user_theme', newTheme);
+		console.log('用户强制切换主题:', newTheme);
+
 		return newTheme;
 	}
 
@@ -129,6 +142,25 @@ class ThemeManager {
 	// 获取当前是否为黑暗模式
 	isCurrentDark() {
 		return this.isDarkMode;
+	}
+
+	// 重置为API自动模式
+	resetToAutoMode() {
+		// 清除用户手动设置标记
+		uni.removeStorageSync('user_theme');
+		console.log('已重置为API自动模式');
+
+		// 立即调用API获取当前主题
+		this.fetchThemeFromAPI().then(apiTheme => {
+			this.setTheme(apiTheme);
+		}).catch(error => {
+			console.error('重置自动模式失败:', error);
+		});
+	}
+
+	// 检查是否为用户手动设置
+	isUserManualMode() {
+		return !!uni.getStorageSync('user_theme');
 	}
 
 	// 添加主题变化监听器

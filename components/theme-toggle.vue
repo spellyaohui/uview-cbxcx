@@ -6,7 +6,7 @@
 			</view>
 			<view class="theme-text">
 				<text class="theme-label">{{ themeLabel }}</text>
-				<text class="theme-desc">{{ themeDesc }}</text>
+				<text class="theme-desc">{{ modeDesc }}</text>
 			</view>
 			<view class="theme-switch">
 				<view class="switch-track" :class="{ active: isDarkMode }">
@@ -15,6 +15,12 @@
 					</view>
 				</view>
 			</view>
+		</view>
+
+		<!-- 恢复API模式按钮 -->
+		<view v-if="isUserManualMode" class="reset-auto-mode" @click="resetToAutoMode">
+			<text class="reset-text">下次冷启动恢复API状态</text>
+			<text class="reset-icon">🔄</text>
 		</view>
 	</view>
 </template>
@@ -25,20 +31,66 @@ import themeMixin from '@/mixins/theme.js';
 export default {
 	name: 'ThemeToggle',
 	mixins: [themeMixin],
+	data() {
+		return {
+			isUserManualMode: false
+		}
+	},
 	computed: {
 		themeLabel() {
 			return this.isDarkMode ? '浅色模式' : '深色模式';
 		},
-		themeDesc() {
-			return this.isDarkMode ? '切换到浅色主题' : '切换到深色主题';
+		modeDesc() {
+			if (this.isUserManualMode) {
+				return this.isDarkMode ? '已手动覆盖' : '已手动覆盖';
+			} else {
+				return this.isDarkMode ? '跟随API状态' : '跟随API状态';
+			}
 		}
 	},
+	mounted() {
+		this.checkManualMode();
+	},
 	methods: {
+		// 检查是否为手动模式
+		checkManualMode() {
+			const app = getApp();
+			if (app && app.globalData && app.globalData.themeManager) {
+				this.isUserManualMode = app.globalData.themeManager.isUserManualMode();
+			}
+		},
+
+		// 恢复自动模式
+		resetToAutoMode() {
+			const app = getApp();
+			if (app && app.globalData && app.globalData.themeManager) {
+				app.globalData.themeManager.resetToAutoMode();
+				this.isUserManualMode = false;
+
+				// 触觉反馈
+				// #ifdef APP-PLUS
+				if (typeof plus !== 'undefined' && plus.device) {
+					plus.device.vibrate(8);
+				}
+				// #endif
+
+				// 显示提示
+				uni.showToast({
+					title: '下次冷启动将恢复API状态',
+					icon: 'success',
+					duration: 2000
+				});
+			}
+		},
+
 		toggleTheme() {
 			// 调用App.vue的主题切换方法
 			const app = getApp();
 			if (app && app.toggleTheme) {
 				app.toggleTheme();
+
+				// 更新手动模式状态
+				this.isUserManualMode = true;
 
 				// 重新获取主题状态
 				this.$nextTick(() => {
@@ -184,6 +236,39 @@ export default {
 .switch-icon {
 	font-size: 20rpx;
 	line-height: 1;
+}
+
+/* 恢复自动模式按钮 */
+.reset-auto-mode {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--bg-secondary);
+	border-radius: var(--radius-md);
+	padding: var(--spacing-sm);
+	margin-top: var(--spacing-sm);
+	border: 1px solid var(--border-color);
+	transition: all 0.3s ease;
+	cursor: pointer;
+}
+
+.reset-auto-mode:hover {
+	background: var(--bg-tertiary);
+	transform: translateY(-1rpx);
+}
+
+.reset-auto-mode:active {
+	transform: translateY(0);
+}
+
+.reset-text {
+	font-size: 24rpx;
+	color: var(--text-secondary);
+	margin-right: var(--spacing-xs);
+}
+
+.reset-icon {
+	font-size: 20rpx;
 }
 
 /* 深色模式下的微调 */

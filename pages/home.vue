@@ -444,19 +444,64 @@
 				}
 				// #endif
 
-				// 只允许通过相机扫码
+				// 使用支付宝扫码插件
+				// #ifdef APP-PLUS
+				try {
+					const mpaasScanModule = uni.requireNativePlugin("Mpaas-Scan-Module");
+					mpaasScanModule.mpaasScan({
+						'scanType': ['qrCode', 'barCode'], // 支持二维码和条形码
+						'hideAlbum': true, // 显示相册按钮
+						'language': 'zh', // 中文语言
+						'failedMsg': '未识别到二维码，请重试', // 错误提示
+						'screenType': 'full', // 全屏扫描
+						'timeoutInterval': '30', // 30秒超时
+						'timeoutText': '未识别到二维码？'
+					}, (ret) => {
+						console.log('扫码结果:', ret);
+
+						// 返回值中，resp_code 表示返回结果值，10：用户取消，11：其他错误，1000：成功
+						// 返回值中，resp_message 表示返回结果信息
+						// 返回值中，resp_result 表示扫码结果，只有成功才会有返回
+						if (ret.resp_code === 1000) {
+							// 扫码成功
+							thiz.scancodeApi({
+								code: ret.resp_result
+							});
+						} else if (ret.resp_code === 10) {
+							// 用户取消
+							console.log('用户取消扫码');
+						} else {
+							// 其他错误
+							thiz.showToast('扫码失败：' + (ret.resp_message || '未知错误'), 'none');
+						}
+					});
+				} catch (error) {
+					console.error('调用支付宝扫码插件失败:', error);
+					// 如果插件调用失败，回退到uni.scanCode
+					this.fallbackScanCode();
+				}
+				// #endif
+
+				// #ifndef APP-PLUS
+				// 非App平台使用uni.scanCode
+				this.fallbackScanCode();
+				// #endif
+			},
+
+			// 回退扫码方法
+			fallbackScanCode() {
 				uni.scanCode({
 					onlyFromCamera: true,
-					success: function (res) {
+					success: (res) => {
 						console.log('条码类型：' + res.scanType);
 						console.log('条码内容：' + res.result);
-						thiz.scancodeApi({
+						this.scancodeApi({
 							code: res.result
 						});
 					},
-					fail: function (err) {
+					fail: (err) => {
 						console.error('扫码失败:', err);
-						thiz.showToast('扫码失败，请重试', 'none');
+						this.showToast('扫码失败，请重试', 'none');
 					}
 				});
 			},

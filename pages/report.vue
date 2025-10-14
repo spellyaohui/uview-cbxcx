@@ -498,6 +498,15 @@
 						});
 						return;
 					}
+
+					// 其他code状态的处理
+					if (tjbgjc.code && tjbgjc.code != 200) {
+						uni.showToast({
+							title: tjbgjc.msg || '操作失败',
+							icon: 'none'
+						});
+						return;
+					}
 				} catch (error) {
 					console.error('提交报告监测失败:', error);
 					uni.showToast({
@@ -557,6 +566,15 @@
 						});
 						return;
 					}
+
+					// 其他code状态的处理
+					if (tjbgzz.code && tjbgzz.code != 200) {
+						uni.showToast({
+							title: tjbgzz.msg || '操作失败',
+							icon: 'none'
+						});
+						return;
+					}
 				} catch (error) {
 					console.error('提交报告制作失败:', error);
 					uni.showToast({
@@ -596,6 +614,57 @@
 				this.scaninput_smcxShow = true;
 				// #endif
 				// #ifndef H5
+				this.startScanForReport();
+				// #endif
+			},
+
+			// 开始扫码报告
+			startScanForReport() {
+				// 使用支付宝扫码插件
+				// #ifdef APP-PLUS
+				try {
+					const mpaasScanModule = uni.requireNativePlugin("Mpaas-Scan-Module");
+					mpaasScanModule.mpaasScan({
+						'scanType': ['qrCode', 'barCode'], // 支持二维码和条形码
+						'hideAlbum': false, // 显示相册按钮
+						'language': 'zh', // 中文语言
+						'failedMsg': '未识别到条码，请重试', // 错误提示
+						'screenType': 'full', // 全屏扫描
+						'timeoutInterval': '30', // 30秒超时
+						'timeoutText': '未识别到条码？'
+					}, (ret) => {
+						console.log('扫码结果:', ret);
+
+						// 返回值中，resp_code 表示返回结果值，10：用户取消，11：其他错误，1000：成功
+						// 返回值中，resp_message 表示返回结果信息
+						// 返回值中，resp_result 表示扫码结果，只有成功才会有返回
+						if (ret.resp_code === 1000) {
+							// 扫码成功
+							this.scaninput_smcx = ret.resp_result;
+							this.handleSearch();
+						} else if (ret.resp_code === 10) {
+							// 用户取消
+							console.log('用户取消扫码');
+						} else {
+							// 其他错误
+							this.showToast('扫码失败：' + (ret.resp_message || '未知错误'), 'none');
+						}
+					});
+				} catch (error) {
+					console.error('调用支付宝扫码插件失败:', error);
+					// 如果插件调用失败，回退到uni.scanCode
+					this.fallbackScanForReport();
+				}
+				// #endif
+
+				// #ifndef APP-PLUS
+				// 非App平台使用uni.scanCode
+				this.fallbackScanForReport();
+				// #endif
+			},
+
+			// 回退扫码方法（用于报告查询）
+			fallbackScanForReport() {
 				let thiz = this;
 				uni.scanCode({
 					success: function (res) {
@@ -607,7 +676,6 @@
 						thiz.showToast('扫码失败，请重试', 'none');
 					}
 				});
-				// #endif
 			},
 
 			// H5扫码成功回调方法

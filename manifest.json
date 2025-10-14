@@ -32,7 +32,8 @@
         /* 模块配置 */
         "modules" : {
             "Barcode" : {},
-            "Push" : {}
+            "Push" : {},
+            "Camera" : {}
         },
         /* 应用发布信息 */
         "distribute" : {
@@ -109,6 +110,41 @@
         },
         "uniStatistics" : {
             "enable" : true
+        },
+        "nativePlugins" : {
+            "Mpaas-Scan" : {
+                "AppId" : "ALIPUB74ABB40141746",
+                "License" : "LjMJZC4QfJWu8TuzrJpdK1HQcXLGciPkTb4gncn5cnvJlRxQ2atqQ0m2kO2Yrs95ddbvCiFQG7pvoDhKnV0kx5gqimzS0NlZxIBp6+2bpYMdXAEmHGd/yqShG0JevvNdKUHf2U72yKxzXFgQk7x+ulAKaeATV/R4SujbEi4IXaHa+ifz9/aFtrxu8CC3LJr1QgpEXQazSjCdZ6SGwY3KsH1dCQs/UIK34rofRnVg6t3lTwMO8Cj8mK1EMUWANSgJpkLBa4+y69fWtHnlRX+kQzeuzWt2xsIPSemwL83ihiZg2kt4DHrY/4rzul45t6M+D/vmPnMwYgSNlH1yceZnnQ==",
+                "WorkspaceId" : "default",
+                "__plugin_info__" : {
+                    "name" : "支付宝原生扫码插件",
+                    "description" : "支付宝原生扫码组件，包体积仅0.7MB，15分钟即可完成接入。同时，mPaaS提供「扫码分析」大盘",
+                    "platforms" : "Android,iOS",
+                    "url" : "https://ext.dcloud.net.cn/plugin?id=2636",
+                    "android_package_name" : "uni.app.uni595054e",
+                    "ios_bundle_id" : "",
+                    "isCloud" : true,
+                    "bought" : 1,
+                    "pid" : "2636",
+                    "parameters" : {
+                        "AppId" : {
+                            "des" : "Android平台的AppId，请填写Android的config文件中的appId对应的值",
+                            "key" : "mobilegw.appid",
+                            "value" : ""
+                        },
+                        "License" : {
+                            "des" : "Android平台的License,，请填写Android的config文件中的mpaasConfigLicense对应的值",
+                            "key" : "mpaasConfigLicense",
+                            "value" : ""
+                        },
+                        "WorkspaceId" : {
+                            "des" : "Android平台的WorkspaceId，请填写Android的config文件中的workspaceId对应的值",
+                            "key" : "workspaceId",
+                            "value" : ""
+                        }
+                    }
+                }
+            }
         }
     },
     /* 快应用特有相关 */

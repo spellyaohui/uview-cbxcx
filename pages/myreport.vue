@@ -432,11 +432,23 @@
 				}
 			},
 
+			// 确认删除
+			confirmDelete(item) {
+				this.selectedReport = item;
+				this.showDeleteModal = true;
+			},
+
+			// 关闭删除模态框
+			closeDeleteModal() {
+				this.showDeleteModal = false;
+				this.selectedReport = null;
+			},
+
 			// 删除报告
 			async deleteReport() {
 				if (!this.selectedReport || this.deleting) return;
 				this.deleting = true;
-				
+
 				uni.showLoading({
 					title: '删除中...'
 				});

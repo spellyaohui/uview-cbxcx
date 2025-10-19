@@ -2,8 +2,8 @@
     "name" : "崔博小程序",
     "appid" : "__UNI__595054E",
     "description" : "崔博小程序",
-    "versionName" : "1.0.9.4",
-    "versionCode" : 100,
+    "versionName" : "1.0.9.5",
+    "versionCode" : 101,
     "transformPx" : false,
     /* 5+App特有相关 */
     "app-plus" : {

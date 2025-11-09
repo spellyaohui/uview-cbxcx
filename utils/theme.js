@@ -29,7 +29,7 @@ class ThemeManager {
 	async fetchThemeFromAPI() {
 		return new Promise((resolve, reject) => {
 			uni.request({
-				url: 'http://btpanelweb.wjtjyy.top:4000/api/day-night-status',
+				url: 'http://btpanelapi.wjtjyy.top:4000/api/day-night-status',
 				method: 'GET',
 				success: (res) => {
 					console.log('API调用成功，返回数据:', res);

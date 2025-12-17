@@ -1,6 +1,4 @@
 <script>
-	import themeManager from '@/utils/theme.js';
-
 	export default {
 		globalData: {
 			userInfo: null,
@@ -8,14 +6,13 @@
 			homePage: '/pages/index',
 			pages: ['/pages/index', '/pages/home', '/pages/report', '/pages/myreport'],
 			userData: {},
-			// 添加主题状态
-			isDarkMode: false,
-			// 添加主题管理器
-			themeManager: themeManager
+			// 简化的主题状态
+			currentTheme: 'light',
+			isDarkMode: false
 		},
 		async onLaunch() {
-			// 初始化主题管理器（等待API调用完成）
-			await this.initThemeManager();
+			// 初始化标准主题系统
+			this.initStandardTheme();
 
 			// 获取状态栏高度并设置全局变量
 			this.setStatusBarHeight();
@@ -198,150 +195,83 @@
 			}, 2000);
 		},
 
-		onThemeChange({ theme }) {
-			// 当系统主题发生变化时，同步更新全局主题状态
-			const isDark = theme === 'dark';
-			this.globalData.isDarkMode = isDark;
+		// 官方主题变化回调
+		onThemeChange(res) {
+			console.log('系统主题变化:', res.theme);
+			
+			// 更新全局状态
+			this.globalData.currentTheme = res.theme;
+			this.globalData.isDarkMode = res.theme === 'dark';
 
-			// 更新主题管理器状态
-			if (this.globalData.themeManager) {
-				this.globalData.themeManager.currentTheme = theme;
-				this.globalData.themeManager.isDarkMode = isDark;
-			}
-
-			// 更新body类以应用主题
-			// #ifdef H5
-			this.$nextTick(() => {
-				if (typeof document !== 'undefined' && document.body) {
-					if (isDark) {
-						document.body.classList.add('theme-dark');
-						document.body.classList.remove('theme-light');
-						document.body.setAttribute('data-theme', 'dark');
-					} else {
-						document.body.classList.remove('theme-dark');
-						document.body.classList.add('theme-light');
-						document.body.setAttribute('data-theme', 'light');
-					}
-				}
+			// 触发全局事件通知所有页面
+			uni.$emit('themeChange', {
+				theme: res.theme,
+				isDark: res.theme === 'dark'
 			});
-			// #endif
 
-			// 应用原生主题
-			// #ifdef APP-PLUS || H5
-			uni.setNavigationBarColor({
-				frontColor: isDark ? '#ffffff' : '#000000',
-				backgroundColor: isDark ? '#1a1a1a' : '#07c160',
-				animation: {
-					duration: 300,
-					timingFunc: 'easeIn'
-				}
-			});
-			// #endif
-
-			// 设置状态栏主题
-			// #ifdef APP-PLUS
-			if (typeof plus !== 'undefined' && plus.navigator) {
-				plus.navigator.setStatusBarStyle(isDark ? 'light' : 'dark');
-			}
-			// #endif
-
-			// 更新所有页面
-			this.updatePageThemeClass(isDark);
+			// 更新原生界面主题
+			this.updateNativeTheme(res.theme);
 		},
 
 		methods: {
-			// 初始化主题管理器
-			async initThemeManager() {
-				// 初始化主题管理器（通过API获取主题）
-				await this.globalData.themeManager.init();
-
-				// 同步主题状态到globalData
-				this.globalData.isDarkMode = this.globalData.themeManager.isCurrentDark();
-
-				// 立即应用主题到页面
-				this.updatePageThemeClass(this.globalData.isDarkMode);
-
-				// 监听主题变化并同步到globalData
-				uni.$on('themeChange', ({ theme, isDark }) => {
-					this.globalData.isDarkMode = isDark;
-
-					// 立即应用主题到页面
-					this.updatePageThemeClass(isDark);
-
-					// 更新全局 store
-					if (this.$store && this.$store.updateTheme) {
-						this.$store.updateTheme(isDark, theme);
-					}
+			// 初始化标准主题系统
+			initStandardTheme() {
+				console.log('初始化标准主题系统...');
+				
+				// 获取初始主题状态
+				this.getCurrentTheme().then(theme => {
+					console.log('应用启动时的主题:', theme);
 				});
-			},
 
-			// 设置主题 - 使用主题管理器
-			setTheme(theme) {
-				this.globalData.themeManager.setTheme(theme);
-				this.globalData.isDarkMode = this.globalData.themeManager.isCurrentDark();
-			},
-
-			// 切换主题 - 使用主题管理器
-			toggleTheme() {
-				const result = this.globalData.themeManager.toggleTheme();
-				this.globalData.isDarkMode = this.globalData.themeManager.isCurrentDark();
-
-				// 更新全局 store
-				if (this.$store && this.$store.updateTheme) {
-					this.$store.updateTheme(this.globalData.isDarkMode, result.theme || result);
+				// 初始化全局状态管理
+				if (this.$store && this.$store.initTheme) {
+					this.$store.initTheme();
 				}
-
-				// 强制更新当前页面的主题类
-				this.updatePageThemeClass(this.globalData.isDarkMode);
-
-				return result;
 			},
-			
-			// 更新页面主题类
-			updatePageThemeClass(isDarkMode) {
-				// #ifdef H5
-				this.$nextTick(() => {
-					if (typeof document !== 'undefined' && document.body) {
-						if (isDarkMode) {
-							document.body.classList.add('theme-dark');
-							document.body.classList.remove('theme-light');
-							document.body.setAttribute('data-theme', 'dark');
-						} else {
-							document.body.classList.remove('theme-dark');
-							document.body.classList.add('theme-light');
-							document.body.setAttribute('data-theme', 'light');
-						}
+
+			// 更新原生界面主题
+			updateNativeTheme(theme) {
+				const isDark = theme === 'dark';
+				console.log('更新原生界面主题:', theme);
+
+				// 设置导航栏主题
+				// #ifdef APP-PLUS || H5
+				uni.setNavigationBarColor({
+					frontColor: isDark ? '#ffffff' : '#000000',
+					backgroundColor: isDark ? '#1a1a1a' : '#07c160',
+					animation: {
+						duration: 300,
+						timingFunc: 'easeIn'
 					}
 				});
 				// #endif
-				
+
+				// 设置状态栏主题
 				// #ifdef APP-PLUS
-				if (typeof plus !== 'undefined') {
-					plus.navigator.setStatusBarStyle(isDarkMode ? 'light' : 'dark');
+				if (typeof plus !== 'undefined' && plus.navigator) {
+					plus.navigator.setStatusBarStyle(isDark ? 'light' : 'dark');
 				}
 				// #endif
-				
-				// 更新当前页面栈的页面
-				const pages = getCurrentPages();
-				pages.forEach(page => {
-					if (page && page.$vm) {
-						// 更新页面的数据
-						if (page.$vm.setData) {
-							// 小程序方式
-							page.$vm.setData({ isDarkMode });
-						} else {
-							// Vue 页面方式
-							if (page.$vm.isDarkMode !== undefined) {
-								page.$vm.isDarkMode = isDarkMode;
-							}
-						}
-					}
-				});
 			},
 
-			// 获取当前主题 - 使用主题管理器
+			// 获取当前主题
 			getCurrentTheme() {
-				return this.globalData.themeManager.getCurrentTheme();
+				return new Promise((resolve) => {
+					uni.getSystemInfo({
+						success: (res) => {
+							const theme = res.theme || 'light';
+							this.globalData.currentTheme = theme;
+							this.globalData.isDarkMode = theme === 'dark';
+							resolve(theme);
+						},
+						fail: () => {
+							const defaultTheme = 'light';
+							this.globalData.currentTheme = defaultTheme;
+							this.globalData.isDarkMode = false;
+							resolve(defaultTheme);
+						}
+					});
+				});
 			},
 
 			// 设置状态栏高度

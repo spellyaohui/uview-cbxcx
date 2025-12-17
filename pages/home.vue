@@ -142,20 +142,16 @@
 			</view>
 		</view>
 
-		<!-- 主题切换组件 -->
-		<theme-toggle />
+		<!-- 移除手动主题切换组件，改用系统自动跟随 -->
 	</view>
 </template>
 
 <script>
 	import checkUpdate from '@/uni_modules/uni-upgrade-center-app/utils/check-update'; //更新方法
-	import themeToggle from '@/components/theme-toggle.vue'; // 导入主题切换组件
-	import themeMixin from '@/mixins/theme.js'; // 导入主题混入
+	import themeStandardMixin from '@/mixins/theme-standard.js'; // 导入标准主题混入
+	
 	export default {
-		components: {
-			themeToggle
-		},
-		mixins: [themeMixin],
+		mixins: [themeStandardMixin],
 		data() {
 			return {
 				//用户全局信息

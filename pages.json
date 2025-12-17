@@ -39,6 +39,14 @@
 			}
 		},
 		{
+			"path": "pages/theme-test",
+			"style": {
+				"navigationBarTitleText": "主题测试",
+				"navigationBarBackgroundColor": "@navBgColor",
+				"navigationBarTextStyle": "@navTxtStyle"
+			}
+		},
+		{
 			"path": "uni_modules/uni-upgrade-center-app/pages/upgrade-popup",
 			"style": {
 				"disableScroll": true,

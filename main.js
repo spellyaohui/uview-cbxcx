@@ -107,7 +107,7 @@ export function createApp() {
 	app.config.globalProperties.$auth = Auth
 	app.config.globalProperties.$store = store
 
-	// 初始化主题
+	// 初始化标准主题系统
 	store.initTheme();
 
 	// 确保App端支持深色模式

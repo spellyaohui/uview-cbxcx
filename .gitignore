@@ -5,6 +5,9 @@ CLAUDE.md
 .claude-cache/
 .claude-cache/**/*
 
+# Kiro 指导文件和缓存
+.Kiro/
+
 # 依赖目录
 node_modules/
 npm-debug.log*

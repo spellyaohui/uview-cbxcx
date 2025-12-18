@@ -38,10 +38,11 @@
 				"navigationBarTitleText": ""
 			}
 		},
+
 		{
-			"path": "pages/theme-test",
+			"path": "pages/scan-debug",
 			"style": {
-				"navigationBarTitleText": "主题测试",
+				"navigationBarTitleText": "扫码调试",
 				"navigationBarBackgroundColor": "@navBgColor",
 				"navigationBarTextStyle": "@navTxtStyle"
 			}

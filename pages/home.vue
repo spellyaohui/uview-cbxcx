@@ -160,13 +160,6 @@
 				globalOption: {},
 				//自定义全局变量
 				globalData: {},
-				dkzf: {
-					ip: '',
-					msg: '',
-					recordType: '',
-					ret: 0,
-					ruleKey: ''
-				},
 				scancode: ``,
 				navbarHeight: 0,
 				// 统计数据
@@ -227,7 +220,6 @@
 		},
 		methods: {
 			async init() {
-				await this.dkzfApi();
 				await this.loadStats();
 			},
 
@@ -333,26 +325,7 @@
 				}
 			},
 
-			// 提交白名单 API请求方法
-			async dkzfApi(param) {
-				let thiz = this;
-				param = param || {};
 
-				//请求地址及请求数据，可以在加载前执行上面增加自己的代码逻辑
-				let http_url = 'https://unraid.wjtjyy.top:16626/cuibo/wl/dkzf';
-				let http_data = {};
-				let http_header = {
-					'Content-Type': 'application/json',
-					authorization: 'Basic Y3VpYm86MTk4NjA1MTU='
-				};
-
-				try {
-					let dkzf = await this.$http.get(http_url, http_data, http_header, 'json');
-					this.dkzf = dkzf;
-				} catch (error) {
-					console.error('提交白名单失败:', error);
-				}
-			},
 
 			// 扫码授权 API请求方法
 			async scancodeApi(param) {
@@ -443,16 +416,37 @@
 				// 使用支付宝扫码插件
 				// #ifdef APP-PLUS
 				try {
+					// 使用官方文档中的正确插件名称
 					const mpaasScanModule = uni.requireNativePlugin("Mpaas-Scan-Module");
-					mpaasScanModule.mpaasScan({
-						'scanType': ['qrCode', 'barCode'], // 支持二维码和条形码
-						'hideAlbum': true, // 显示相册按钮
-						'language': 'zh', // 中文语言
-						'failedMsg': '未识别到二维码，请重试', // 错误提示
-						'screenType': 'full', // 全屏扫描
-						'timeoutInterval': '30', // 30秒超时
-						'timeoutText': '未识别到二维码？'
-					}, (ret) => {
+					
+					// 检查插件是否加载成功
+					if (!mpaasScanModule) {
+						console.error('支付宝扫码插件未加载成功，使用回退方案');
+						this.fallbackScanCode();
+						return;
+					}
+					
+					console.log('开始调用支付宝扫码插件...');
+					mpaasScanModule.mpaasScan(
+						{
+							// 扫码识别类型，参数可多选，qrCode、barCode，不设置，默认识别所有
+							scanType: ['qrCode', 'barCode'],
+							// 隐藏相册按钮，只允许实时扫码
+							hideAlbum: true,
+							// ios需要设置这个参数，只支持中英文 zh-Hans、en，默认中文
+							language: 'zh-Hans',
+							// 相册选择照片识别错误提示(ios)
+							failedMsg: '未识别到二维码，请重试',
+							// Android支持全屏需要设置此参数
+							screenType: 'full',
+							// 设置超时时间（数字类型）
+							timeoutInterval: 30,
+							// 超时提醒文本
+							timeoutText: '未识别到二维码？',
+							// 关闭连续扫描
+							continuous: false
+						},
+						(ret) => {
 						console.log('扫码结果:', ret);
 
 						// 返回值中，resp_code 表示返回结果值，10：用户取消，11：其他错误，1000：成功

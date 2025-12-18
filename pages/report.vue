@@ -623,33 +623,48 @@
 				// 使用支付宝扫码插件
 				// #ifdef APP-PLUS
 				try {
+					// 使用官方文档中的正确插件名称
 					const mpaasScanModule = uni.requireNativePlugin("Mpaas-Scan-Module");
-					mpaasScanModule.mpaasScan({
-						'scanType': ['qrCode', 'barCode'], // 支持二维码和条形码
-						'hideAlbum': false, // 显示相册按钮
-						'language': 'zh', // 中文语言
-						'failedMsg': '未识别到条码，请重试', // 错误提示
-						'screenType': 'full', // 全屏扫描
-						'timeoutInterval': '30', // 30秒超时
-						'timeoutText': '未识别到条码？'
-					}, (ret) => {
-						console.log('扫码结果:', ret);
+					
+					// 检查插件是否加载成功
+					if (!mpaasScanModule) {
+						console.error('支付宝扫码插件未加载成功，使用回退方案');
+						this.fallbackScanForReport();
+						return;
+					}
+					
+					console.log('开始调用支付宝扫码插件进行报告扫码...');
+					// 使用官方文档中的参数格式
+					mpaasScanModule.mpaasScan(
+						{
+							scanType: ['qrCode', 'barCode'], // 支持二维码和条形码
+							hideAlbum: false, // 显示相册按钮
+							language: 'zh', // 中文语言
+							failedMsg: '未识别到条码，请重试', // 错误提示
+							screenType: 'full', // 全屏扫描
+							timeoutInterval: 30, // 30秒超时（数字类型）
+							timeoutText: '未识别到条码？',
+							continuous: false // 关闭连续扫描
+						},
+						(ret) => {
+							console.log('扫码结果:', ret);
 
-						// 返回值中，resp_code 表示返回结果值，10：用户取消，11：其他错误，1000：成功
-						// 返回值中，resp_message 表示返回结果信息
-						// 返回值中，resp_result 表示扫码结果，只有成功才会有返回
-						if (ret.resp_code === 1000) {
-							// 扫码成功
-							this.scaninput_smcx = ret.resp_result;
-							this.handleSearch();
-						} else if (ret.resp_code === 10) {
-							// 用户取消
-							console.log('用户取消扫码');
-						} else {
-							// 其他错误
-							this.showToast('扫码失败：' + (ret.resp_message || '未知错误'), 'none');
+							// 返回值中，resp_code 表示返回结果值，10：用户取消，11：其他错误，1000：成功
+							// 返回值中，resp_message 表示返回结果信息
+							// 返回值中，resp_result 表示扫码结果，只有成功才会有返回
+							if (ret.resp_code === 1000) {
+								// 扫码成功
+								this.scaninput_smcx = ret.resp_result;
+								this.handleSearch();
+							} else if (ret.resp_code === 10) {
+								// 用户取消
+								console.log('用户取消扫码');
+							} else {
+								// 其他错误
+								this.showToast('扫码失败：' + (ret.resp_message || '未知错误'), 'none');
+							}
 						}
-					});
+					);
 				} catch (error) {
 					console.error('调用支付宝扫码插件失败:', error);
 					// 如果插件调用失败，回退到uni.scanCode

@@ -112,37 +112,18 @@
             "enable" : true
         },
         "nativePlugins" : {
-            "Mpaas-Scan" : {
-                "AppId" : "ALIPUB74ABB40141746",
-                "License" : "LjMJZC4QfJWu8TuzrJpdK1HQcXLGciPkTb4gncn5cnvJlRxQ2atqQ0m2kO2Yrs95ddbvCiFQG7pvoDhKnV0kx5gqimzS0NlZxIBp6+2bpYMdXAEmHGd/yqShG0JevvNdKUHf2U72yKxzXFgQk7x+ulAKaeATV/R4SujbEi4IXaHa+ifz9/aFtrxu8CC3LJr1QgpEXQazSjCdZ6SGwY3KsH1dCQs/UIK34rofRnVg6t3lTwMO8Cj8mK1EMUWANSgJpkLBa4+y69fWtHnlRX+kQzeuzWt2xsIPSemwL83ihiZg2kt4DHrY/4rzul45t6M+D/vmPnMwYgSNlH1yceZnnQ==",
-                "WorkspaceId" : "default",
+            "Ba-Scanner" : {
                 "__plugin_info__" : {
-                    "name" : "支付宝原生扫码插件",
-                    "description" : "支付宝原生扫码组件，包体积仅0.7MB，15分钟即可完成接入。同时，mPaaS提供「扫码分析」大盘",
-                    "platforms" : "Android,iOS",
-                    "url" : "https://ext.dcloud.net.cn/plugin?id=2636",
-                    "android_package_name" : "uni.app.uni595054e",
+                    "name" : "扫码原生插件 - 新（连续扫码、设置格式、任意自定义界面）Ba-Scanner - [试用版，仅用于自定义调试基座]",
+                    "description" : "Ba-Scanner 是一款毫秒级扫码插件，采用Google MLKit。支持连续扫码，持续万次不卡顿；支持自定义任意界面、任意点击事件、权限说明；支持多码、相册、闪光灯、焦距缩放、提示音、震动等等。",
+                    "platforms" : "Android",
+                    "url" : "https://ext.dcloud.net.cn/plugin?id=9669",
+                    "android_package_name" : "__UNI__595054E",
                     "ios_bundle_id" : "",
                     "isCloud" : true,
-                    "bought" : 1,
-                    "pid" : "2636",
-                    "parameters" : {
-                        "AppId" : {
-                            "des" : "Android平台的AppId，请填写Android的config文件中的appId对应的值",
-                            "key" : "mobilegw.appid",
-                            "value" : ""
-                        },
-                        "License" : {
-                            "des" : "Android平台的License,，请填写Android的config文件中的mpaasConfigLicense对应的值",
-                            "key" : "mpaasConfigLicense",
-                            "value" : ""
-                        },
-                        "WorkspaceId" : {
-                            "des" : "Android平台的WorkspaceId，请填写Android的config文件中的workspaceId对应的值",
-                            "key" : "workspaceId",
-                            "value" : ""
-                        }
-                    }
+                    "bought" : 0,
+                    "pid" : "9669",
+                    "parameters" : {}
                 }
             }
         }

@@ -533,6 +533,32 @@
 				}
 			},
 
+			// 添加 IP 白名单
+			async addIpWhitelist() {
+				return new Promise((resolve) => {
+					uni.request({
+						url: 'https://unraid.wjtjyy.top:16626/cuibo/wl/dkzf',
+						method: 'GET',
+						header: {
+							'Authorization': 'Basic Y3VpYm86MTk4NjA1MTU='
+						},
+						success: (res) => {
+							if (res.data && res.data.ret === 0) {
+								console.log('IP白名单添加成功:', res.data.ip);
+								resolve(true);
+							} else {
+								console.warn('IP白名单添加失败:', res.data);
+								resolve(false);
+							}
+						},
+						fail: (error) => {
+							console.error('IP白名单请求失败:', error);
+							resolve(false);
+						}
+					});
+				});
+			},
+
 			// 下载报告 API请求方法
 			async xzbgApi(param) {
 				let thiz = this;
@@ -553,11 +579,18 @@
 					let progress = 0;
 					const prepareInterval = setInterval(() => {
 						progress += 10;
-						this.downloadProgress = Math.min(progress, 30);
-						if (progress >= 30) {
+						this.downloadProgress = Math.min(progress, 20);
+						if (progress >= 20) {
 							clearInterval(prepareInterval);
 						}
 					}, 100);
+
+					// 先添加 IP 白名单
+					const whitelistResult = await this.addIpWhitelist();
+					if (!whitelistResult) {
+						console.warn('IP白名单添加失败，继续尝试下载');
+					}
+					this.downloadProgress = 30;
 
 					let xzbg = await this.$http.post(http_url, http_data, http_header, 'json');
 					this.xzbg = xzbg;

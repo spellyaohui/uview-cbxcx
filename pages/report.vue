@@ -618,77 +618,97 @@
 				// #endif
 			},
 
-			// 开始扫码报告
+			// 开始扫码报告（使用 Ba-Scanner 插件）
 			startScanForReport() {
-				// 使用支付宝扫码插件
 				// #ifdef APP-PLUS
 				try {
-					// 使用官方文档中的正确插件名称
-					const mpaasScanModule = uni.requireNativePlugin("Mpaas-Scan-Module");
+					// 使用 Ba-Scanner 插件（Google MLKit，毫秒级识别）
+					const scanner = uni.requireNativePlugin('Ba-Scanner');
 					
-					// 检查插件是否加载成功
-					if (!mpaasScanModule) {
-						console.error('支付宝扫码插件未加载成功，使用回退方案');
+					if (!scanner) {
+						console.warn('Ba-Scanner 插件未加载，使用备用方案');
 						this.fallbackScanForReport();
 						return;
 					}
 					
-					console.log('开始调用支付宝扫码插件进行报告扫码...');
-					// 使用官方文档中的参数格式
-					mpaasScanModule.mpaasScan(
+					console.log('开始调用 Ba-Scanner 扫码...');
+					scanner.onScan(
 						{
-							scanType: ['qrCode', 'barCode'], // 支持二维码和条形码
-							hideAlbum: false, // 显示相册按钮
-							language: 'zh', // 中文语言
-							failedMsg: '未识别到条码，请重试', // 错误提示
-							screenType: 'full', // 全屏扫描
-							timeoutInterval: 30, // 30秒超时（数字类型）
-							timeoutText: '未识别到条码？',
-							continuous: false // 关闭连续扫描
+							// 扫码完成震动
+							isShowVibrate: true,
+							// 扫码完成声音
+							isShowBeep: true,
+							// 显示相册按钮
+							isShowPhotoAlbum: true,
+							// 显示闪光灯开关
+							isShowLightController: true,
+							// 支持手势缩放
+							zoom: true,
+							// 扫描线颜色（使用主题色）
+							scanColor: '#07c160',
+							// 提示文案
+							hintText: '将条码放入框内，即可自动扫描',
+							// 提示文案颜色
+							hintTextColor: '#FFFFFF',
+							// 提示文案字体大小
+							hintTextSize: 14,
+							// 关闭连续扫描
+							isContinuous: false,
+							// 扫码成功不显示 toast（由业务处理）
+							isShowToast: false,
+							// 支持的扫码格式
+							barcodeFormats: ['QR Code', 'Code 128', 'Code 39', 'EAN-13', 'EAN-8', 'UPC-A', 'Codabar'],
+							// 权限说明
+							perTipTitle: '权限说明',
+							perTipContent: '为确保您能使用扫码服务，需要申请相机权限。'
 						},
 						(ret) => {
-							console.log('扫码结果:', ret);
-
-							// 返回值中，resp_code 表示返回结果值，10：用户取消，11：其他错误，1000：成功
-							// 返回值中，resp_message 表示返回结果信息
-							// 返回值中，resp_result 表示扫码结果，只有成功才会有返回
-							if (ret.resp_code === 1000) {
+							console.log('Ba-Scanner 扫码结果:', ret);
+							
+							if (ret.code === 'success' && ret.result) {
 								// 扫码成功
-								this.scaninput_smcx = ret.resp_result;
+								this.scaninput_smcx = ret.result;
 								this.handleSearch();
-							} else if (ret.resp_code === 10) {
+							} else if (ret.code === 'cancel') {
 								// 用户取消
 								console.log('用户取消扫码');
 							} else {
-								// 其他错误
-								this.showToast('扫码失败：' + (ret.resp_message || '未知错误'), 'none');
+								// 扫码失败
+								console.error('扫码失败:', ret);
+								uni.showToast({
+									title: ret.msg || '扫码失败，请重试',
+									icon: 'none'
+								});
 							}
 						}
 					);
 				} catch (error) {
-					console.error('调用支付宝扫码插件失败:', error);
-					// 如果插件调用失败，回退到uni.scanCode
+					console.error('调用 Ba-Scanner 失败:', error);
 					this.fallbackScanForReport();
 				}
 				// #endif
 
 				// #ifndef APP-PLUS
-				// 非App平台使用uni.scanCode
+				// 非 App 平台使用 uni.scanCode
 				this.fallbackScanForReport();
 				// #endif
 			},
 
-			// 回退扫码方法（用于报告查询）
+			// 回退扫码方法（用于报告查询，允许相册）
 			fallbackScanForReport() {
 				let thiz = this;
 				uni.scanCode({
+					onlyFromCamera: false, // 允许从相册选择
+					scanType: ['qrCode', 'barCode'],
 					success: function (res) {
 						thiz.scaninput_smcx = res.result;
 						thiz.handleSearch();
 					},
 					fail: function (err) {
 						console.error('扫码失败:', err);
-						thiz.showToast('扫码失败，请重试', 'none');
+						if (!err.errMsg || !err.errMsg.includes('cancel')) {
+							thiz.showToast('扫码失败，请重试', 'none');
+						}
 					}
 				});
 			},

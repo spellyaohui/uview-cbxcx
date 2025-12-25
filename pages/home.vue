@@ -393,87 +393,78 @@
 				});
 			},
 
-			// 扫码授权 自定义方法
+			// 扫码授权 自定义方法（使用 Ba-Scanner 插件）
 			async scanCodeFunction(param) {
 				let thiz = this;
 
-				// 检查相机权限
 				// #ifdef APP-PLUS
 				try {
-					const permission = await new Promise((resolve, reject) => {
-						plus.android.requestPermissions(
-							['android.permission.CAMERA'],
-							() => resolve(true),
-							() => reject(false)
-						);
-					});
-				} catch (error) {
-					this.showToast('请授予相机权限', 'none');
-					return;
-				}
-				// #endif
-
-				// 使用支付宝扫码插件
-				// #ifdef APP-PLUS
-				try {
-					// 使用官方文档中的正确插件名称
-					const mpaasScanModule = uni.requireNativePlugin("Mpaas-Scan-Module");
+					// 使用 Ba-Scanner 插件（Google MLKit，毫秒级识别）
+					const scanner = uni.requireNativePlugin('Ba-Scanner');
 					
-					// 检查插件是否加载成功
-					if (!mpaasScanModule) {
-						console.error('支付宝扫码插件未加载成功，使用回退方案');
+					if (!scanner) {
+						console.warn('Ba-Scanner 插件未加载，使用备用方案');
 						this.fallbackScanCode();
 						return;
 					}
 					
-					console.log('开始调用支付宝扫码插件...');
-					mpaasScanModule.mpaasScan(
+					console.log('开始调用 Ba-Scanner 扫码授权...');
+					scanner.onScan(
 						{
-							// 扫码识别类型，参数可多选，qrCode、barCode，不设置，默认识别所有
-							scanType: ['qrCode', 'barCode'],
-							// 隐藏相册按钮，只允许实时扫码
-							hideAlbum: true,
-							// ios需要设置这个参数，只支持中英文 zh-Hans、en，默认中文
-							language: 'zh-Hans',
-							// 相册选择照片识别错误提示(ios)
-							failedMsg: '未识别到二维码，请重试',
-							// Android支持全屏需要设置此参数
-							screenType: 'full',
-							// 设置超时时间（数字类型）
-							timeoutInterval: 30,
-							// 超时提醒文本
-							timeoutText: '未识别到二维码？',
+							// 扫码完成震动
+							isShowVibrate: true,
+							// 扫码完成声音
+							isShowBeep: true,
+							// 【重要】隐藏相册按钮，只允许实时扫码
+							isShowPhotoAlbum: false,
+							// 显示闪光灯开关
+							isShowLightController: true,
+							// 支持手势缩放
+							zoom: true,
+							// 扫描线颜色（使用主题色）
+							scanColor: '#07c160',
+							// 提示文案
+							hintText: '请扫描授权二维码',
+							// 提示文案颜色
+							hintTextColor: '#FFFFFF',
+							// 提示文案字体大小
+							hintTextSize: 14,
 							// 关闭连续扫描
-							continuous: false
+							isContinuous: false,
+							// 扫码成功不显示 toast（由业务处理）
+							isShowToast: false,
+							// 支持的扫码格式（授权码主要是二维码）
+							barcodeFormats: ['QR Code'],
+							// 权限说明
+							perTipTitle: '权限说明',
+							perTipContent: '为确保您能使用扫码授权服务，需要申请相机权限。'
 						},
 						(ret) => {
-						console.log('扫码结果:', ret);
-
-						// 返回值中，resp_code 表示返回结果值，10：用户取消，11：其他错误，1000：成功
-						// 返回值中，resp_message 表示返回结果信息
-						// 返回值中，resp_result 表示扫码结果，只有成功才会有返回
-						if (ret.resp_code === 1000) {
-							// 扫码成功
-							thiz.scancodeApi({
-								code: ret.resp_result
-							});
-						} else if (ret.resp_code === 10) {
-							// 用户取消
-							console.log('用户取消扫码');
-						} else {
-							// 其他错误
-							thiz.showToast('扫码失败：' + (ret.resp_message || '未知错误'), 'none');
+							console.log('Ba-Scanner 扫码授权结果:', ret);
+							
+							if (ret.code === 'success' && ret.result) {
+								// 扫码成功，调用授权接口
+								thiz.scancodeApi({
+									code: ret.result
+								});
+							} else if (ret.code === 'cancel') {
+								// 用户取消
+								console.log('用户取消扫码');
+							} else {
+								// 扫码失败
+								console.error('扫码失败:', ret);
+								thiz.showToast(ret.msg || '扫码失败，请重试', 'none');
+							}
 						}
-					});
+					);
 				} catch (error) {
-					console.error('调用支付宝扫码插件失败:', error);
-					// 如果插件调用失败，回退到uni.scanCode
+					console.error('调用 Ba-Scanner 失败:', error);
 					this.fallbackScanCode();
 				}
 				// #endif
 
 				// #ifndef APP-PLUS
-				// 非App平台使用uni.scanCode
+				// 非 App 平台使用 uni.scanCode
 				this.fallbackScanCode();
 				// #endif
 			},
@@ -481,7 +472,8 @@
 			// 回退扫码方法
 			fallbackScanCode() {
 				uni.scanCode({
-					onlyFromCamera: true,
+					onlyFromCamera: true, // 只允许相机扫码，不允许相册
+					scanType: ['qrCode'],
 					success: (res) => {
 						console.log('条码类型：' + res.scanType);
 						console.log('条码内容：' + res.result);
@@ -491,7 +483,9 @@
 					},
 					fail: (err) => {
 						console.error('扫码失败:', err);
-						this.showToast('扫码失败，请重试', 'none');
+						if (!err.errMsg || !err.errMsg.includes('cancel')) {
+							this.showToast('扫码失败，请重试', 'none');
+						}
 					}
 				});
 			},

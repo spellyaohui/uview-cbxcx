@@ -40,14 +40,6 @@
 		},
 
 		{
-			"path": "pages/scan-debug",
-			"style": {
-				"navigationBarTitleText": "扫码调试",
-				"navigationBarBackgroundColor": "@navBgColor",
-				"navigationBarTextStyle": "@navTxtStyle"
-			}
-		},
-		{
 			"path": "uni_modules/uni-upgrade-center-app/pages/upgrade-popup",
 			"style": {
 				"disableScroll": true,

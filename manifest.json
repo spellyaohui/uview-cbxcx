@@ -114,14 +114,14 @@
         "nativePlugins" : {
             "Ba-Scanner" : {
                 "__plugin_info__" : {
-                    "name" : "扫码原生插件 - 新（连续扫码、设置格式、任意自定义界面）Ba-Scanner - [试用版，仅用于自定义调试基座]",
+                    "name" : "扫码原生插件 - 新（连续扫码、设置格式、任意自定义界面）Ba-Scanner",
                     "description" : "Ba-Scanner 是一款毫秒级扫码插件，采用Google MLKit。支持连续扫码，持续万次不卡顿；支持自定义任意界面、任意点击事件、权限说明；支持多码、相册、闪光灯、焦距缩放、提示音、震动等等。",
                     "platforms" : "Android",
                     "url" : "https://ext.dcloud.net.cn/plugin?id=9669",
-                    "android_package_name" : "__UNI__595054E",
+                    "android_package_name" : "uni.app.uni595054e",
                     "ios_bundle_id" : "",
                     "isCloud" : true,
-                    "bought" : 0,
+                    "bought" : 1,
                     "pid" : "9669",
                     "parameters" : {}
                 }

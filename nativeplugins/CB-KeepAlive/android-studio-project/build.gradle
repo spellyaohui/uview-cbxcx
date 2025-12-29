@@ -1,0 +1,9 @@
+// CB-KeepAlive 根项目构建配置
+
+plugins {
+    id 'com.android.library' version '8.5.0' apply false
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

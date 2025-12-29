@@ -2,7 +2,7 @@
     "name" : "崔博小程序",
     "appid" : "__UNI__595054E",
     "description" : "崔博小程序",
-    "versionName" : "1.0.9.5",
+    "versionName" : "1.0.9.6",
     "versionCode" : 101,
     "transformPx" : false,
     /* 5+App特有相关 */
@@ -54,7 +54,12 @@
                     "<uses-permission android:name=\"android.permission.WAKE_LOCK\"/>",
                     "<uses-permission android:name=\"android.permission.FLASHLIGHT\"/>",
                     "<uses-feature android:name=\"android.hardware.camera\"/>",
-                    "<uses-permission android:name=\"android.permission.WRITE_SETTINGS\"/>"
+                    "<uses-permission android:name=\"android.permission.WRITE_SETTINGS\"/>",
+                    "<uses-permission android:name=\"android.permission.FOREGROUND_SERVICE\"/>",
+                    "<uses-permission android:name=\"android.permission.FOREGROUND_SERVICE_DATA_SYNC\"/>",
+                    "<uses-permission android:name=\"android.permission.POST_NOTIFICATIONS\"/>",
+                    "<uses-permission android:name=\"android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS\"/>",
+                    "<uses-permission android:name=\"android.permission.RECEIVE_BOOT_COMPLETED\"/>"
                 ],
                 "schemes" : "spellcuibo",
                 "minSdkVersion" : 21,
@@ -123,6 +128,20 @@
                     "isCloud" : true,
                     "bought" : 1,
                     "pid" : "9669",
+                    "parameters" : {}
+                }
+            },
+            "CB-KeepAlive" : {
+                "__plugin_info__" : {
+                    "name" : "CB-KeepAlive",
+                    "description" : "崔博小程序Android保活插件",
+                    "platforms" : "Android",
+                    "url" : "",
+                    "android_package_name" : "",
+                    "ios_bundle_id" : "",
+                    "isCloud" : false,
+                    "bought" : -1,
+                    "pid" : "",
                     "parameters" : {}
                 }
             }

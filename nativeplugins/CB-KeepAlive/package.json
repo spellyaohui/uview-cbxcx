@@ -1,0 +1,35 @@
+{
+  "name": "CB-KeepAlive",
+  "id": "CB-KeepAlive",
+  "version": "1.0.1",
+  "description": "崔博小程序Android保活插件",
+  "_dp_type": "nativeplugin",
+  "_dp_nativeplugin": {
+    "android": {
+      "integrateType": "aar",
+      "abis": [
+        "armeabi-v7a",
+        "arm64-v8a"
+      ],
+      "dependencies": [],
+      "plugins": [
+        {
+          "type": "module",
+          "name": "CB-KeepAlive",
+          "class": "io.dcloud.feature.keepalive.KeepAliveModule"
+        }
+      ],
+      "hooksClass": "",
+      "intents": [],
+      "permissions": [
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.WAKE_LOCK"
+      ],
+      "parameters": {}
+    }
+  }
+}

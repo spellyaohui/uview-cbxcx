@@ -38,6 +38,30 @@
 				"navigationBarTitleText": ""
 			}
 		},
+		{
+			"path": "pages/keep-alive-demo",
+			"style": {
+				"navigationBarTitleText": "保活功能演示",
+				"navigationBarBackgroundColor": "@navBgColor",
+				"navigationBarTextStyle": "@navTxtStyle"
+			}
+		},
+		{
+			"path": "pages/keep-alive-settings",
+			"style": {
+				"navigationBarTitleText": "保活设置",
+				"navigationBarBackgroundColor": "@navBgColor",
+				"navigationBarTextStyle": "@navTxtStyle"
+			}
+		},
+		{
+			"path": "pages/heartbeat-debug",
+			"style": {
+				"navigationBarTitleText": "心跳调试",
+				"navigationBarBackgroundColor": "@navBgColor",
+				"navigationBarTextStyle": "@navTxtStyle"
+			}
+		},
 
 		{
 			"path": "uni_modules/uni-upgrade-center-app/pages/upgrade-popup",

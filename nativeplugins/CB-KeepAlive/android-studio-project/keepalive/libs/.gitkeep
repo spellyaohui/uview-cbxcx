@@ -1,0 +1,7 @@
+# 此目录用于存放依赖库
+# 请将 uniapp-v8-release.aar 放置在此目录
+# 
+# 获取方式：
+# 1. 下载 HBuilderX 离线 SDK: https://nativesupport.dcloud.net.cn/AppDocs/download/android
+# 2. 解压后找到 SDK/libs/uniapp-v8-release.aar
+# 3. 复制到此目录

@@ -201,7 +201,27 @@
 			return true; // 返回 true 表示阻止默认返回行为
 		},
 		onReady(e) {
-			checkUpdate();
+			// #ifdef APP-PLUS
+			// 检查是否已经在 App.vue 中检测过更新（避免重复检测）
+			const lastCheckTime = uni.getStorageSync('lastUpdateCheckTime') || 0;
+			const now = Date.now();
+			const checkInterval = 60 * 60 * 1000; // 1小时内不重复检测
+			
+			if (now - lastCheckTime > checkInterval) {
+				checkUpdate().then(() => {
+					uni.setStorageSync('lastUpdateCheckTime', now);
+				}).catch(err => {
+					// code=0 表示当前已是最新版本
+					if (err?.code === 0) {
+						console.log('当前已是最新版本');
+					} else {
+						console.log('检查更新:', err?.message || '无更新');
+					}
+					// 即使检查失败也更新时间戳，避免频繁重试
+					uni.setStorageSync('lastUpdateCheckTime', now);
+				});
+			}
+			// #endif
 		},
 		onShow() {
 			this.setCurrentPage(this);

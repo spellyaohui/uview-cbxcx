@@ -215,6 +215,8 @@
 					console.log('处理后的用户数据:', processedUserData);
 
 					this.$session.setUser(processedUserData);
+					// 通知 App：登录已完成（用于启动保活/心跳等依赖登录态的服务）
+					uni.$emit('userLogin', processedUserData);
 					uni.showToast({
 						title: '登录成功',
 						icon: 'success',

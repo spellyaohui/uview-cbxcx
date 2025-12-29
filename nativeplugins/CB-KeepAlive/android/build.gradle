@@ -1,0 +1,61 @@
+// CB-KeepAlive 插件 Gradle 配置（供 HBuilderX 集成原生插件时使用）
+// 重点：显式声明 AAR 依赖，避免仅登记插件但未把 AAR 合入基座 dex 的情况
+
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 33
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 33
+        versionCode 1
+        versionName "1.0.0"
+
+        // 让宿主在混淆/裁剪时保留插件类（某些构建链路会读取此配置）
+        consumerProguardFiles 'proguard-rules.pro'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lintOptions {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+}
+
+repositories {
+    flatDir {
+        // 兼容两种放置方式：
+        // - android/libs/CB-KeepAlive.aar
+        // - android/CB-KeepAlive.aar
+        dirs 'libs', '.'
+    }
+}
+
+dependencies {
+    // 显式把 AAR 合入（关键）
+    implementation(name: 'CB-KeepAlive', ext: 'aar')
+
+    // 其他依赖由宿主工程提供（避免重复打包）
+    compileOnly 'androidx.core:core:1.8.0'
+    compileOnly 'androidx.appcompat:appcompat:1.5.0'
+    compileOnly 'com.alibaba:fastjson:1.2.83'
+}
+
+// 确保编译时使用UTF-8编码
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+

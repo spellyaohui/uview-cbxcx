@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心跳API测试工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            min-height: 150px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        .response-box {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .response-box.success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        
+        .response-box.error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .status-badge.success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .status-badge.error {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 心跳API测试工具</h1>
+        <p class="subtitle">测试崔博小程序保活心跳接口</p>
+        
+        <div class="section">
+            <div class="section-title">📝 请求配置</div>
+            
+            <div class="form-group">
+                <label>API端点</label>
+                <input type="text" id="apiUrl" value="https://cbapp.wjtjyy.top/api/heartbeat">
+            </div>
+            
+            <div class="form-group">
+                <label>请求体 (JSON)</label>
+                <textarea id="requestBody">{
+  "deviceId": "test_device_web",
+  "appVersion": "1.0.0",
+  "systemVersion": "Web Browser",
+  "deviceModel": "Chrome",
+  "manufacturer": "Google",
+  "keepAliveStatus": "active",
+  "timestamp": 0,
+  "batteryLevel": 100,
+  "networkType": "wifi",
+  "screenWidth": 1920,
+  "screenHeight": 1080
+}</textarea>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn-primary" onclick="sendHeartbeat()">发送心跳</button>
+                <button class="btn-secondary" onclick="generateTimestamp()">更新时间戳</button>
+                <button class="btn-secondary" onclick="clearResponse()">清除响应</button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">📊 响应结果</div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px; color: #666;">发送中...</p>
+            </div>
+            
+            <div id="responseContainer" style="display: none;">
+                <div id="statusBadge"></div>
+                <div id="responseBox" class="response-box"></div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">📈 统计信息</div>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-label">总请求数</div>
+                    <div class="stat-value" id="totalRequests">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">成功次数</div>
+                    <div class="stat-value" id="successCount" style="color: #28a745;">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">失败次数</div>
+                    <div class="stat-value" id="errorCount" style="color: #dc3545;">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let stats = {
+            total: 0,
+            success: 0,
+            error: 0
+        };
+        
+        function generateTimestamp() {
+            const requestBody = document.getElementById('requestBody');
+            try {
+                const data = JSON.parse(requestBody.value);
+                data.timestamp = Date.now();
+                requestBody.value = JSON.stringify(data, null, 2);
+            } catch (e) {
+                alert('JSON格式错误');
+            }
+        }
+        
+        async function sendHeartbeat() {
+            const apiUrl = document.getElementById('apiUrl').value;
+            const requestBody = document.getElementById('requestBody').value;
+            const loading = document.getElementById('loading');
+            const responseContainer = document.getElementById('responseContainer');
+            const responseBox = document.getElementById('responseBox');
+            const statusBadge = document.getElementById('statusBadge');
+            
+            // 显示加载状态
+            loading.classList.add('active');
+            responseContainer.style.display = 'none';
+            
+            try {
+                // 解析请求体
+                const data = JSON.parse(requestBody);
+                
+                // 自动更新时间戳
+                if (data.timestamp === 0) {
+                    data.timestamp = Date.now();
+                }
+                
+                // 发送请求
+                const startTime = Date.now();
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const responseTime = Date.now() - startTime;
+                const result = await response.json();
+                
+                // 更新统计
+                stats.total++;
+                if (response.ok && result.code === 200) {
+                    stats.success++;
+                } else {
+                    stats.error++;
+                }
+                updateStats();
+                
+                // 显示响应
+                loading.classList.remove('active');
+                responseContainer.style.display = 'block';
+                
+                if (response.ok && result.code === 200) {
+                    statusBadge.innerHTML = '<span class="status-badge success">✓ 成功</span>';
+                    responseBox.className = 'response-box success';
+                } else {
+                    statusBadge.innerHTML = '<span class="status-badge error">✗ 失败</span>';
+                    responseBox.className = 'response-box error';
+                }
+                
+                responseBox.textContent = `状态码: ${response.status}\n响应时间: ${responseTime}ms\n\n${JSON.stringify(result, null, 2)}`;
+                
+            } catch (error) {
+                // 更新统计
+                stats.total++;
+                stats.error++;
+                updateStats();
+                
+                // 显示错误
+                loading.classList.remove('active');
+                responseContainer.style.display = 'block';
+                statusBadge.innerHTML = '<span class="status-badge error">✗ 错误</span>';
+                responseBox.className = 'response-box error';
+                responseBox.textContent = `错误: ${error.message}\n\n${error.stack || ''}`;
+            }
+        }
+        
+        function clearResponse() {
+            document.getElementById('responseContainer').style.display = 'none';
+        }
+        
+        function updateStats() {
+            document.getElementById('totalRequests').textContent = stats.total;
+            document.getElementById('successCount').textContent = stats.success;
+            document.getElementById('errorCount').textContent = stats.error;
+        }
+        
+        // 页面加载时自动生成时间戳
+        window.onload = function() {
+            generateTimestamp();
+        };
+    </script>
+</body>
+</html>

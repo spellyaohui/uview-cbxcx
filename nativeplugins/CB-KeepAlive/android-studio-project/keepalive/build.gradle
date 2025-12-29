@@ -1,0 +1,78 @@
+// CB-KeepAlive 模块构建配置
+
+plugins {
+    id 'com.android.library'
+}
+
+android {
+    namespace 'io.dcloud.feature.keepalive'
+    compileSdk 33
+
+    defaultConfig {
+        minSdk 21
+        targetSdk 33
+        versionCode 1
+        versionName "1.0.0"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+    
+    sourceSets {
+        main {
+            java.srcDirs = ['src/main/java']
+            manifest.srcFile 'src/main/AndroidManifest.xml'
+        }
+    }
+}
+
+dependencies {
+    // uni-app SDK - 从HBuilderX离线SDK获取
+    compileOnly fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+    
+    // AndroidX 核心库
+    compileOnly 'androidx.core:core:1.8.0'
+    compileOnly 'androidx.appcompat:appcompat:1.5.0'
+    
+    // JSON 处理
+    compileOnly 'com.alibaba:fastjson:1.2.83'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+// 构建完成后复制AAR到插件目录
+task copyAarToPlugin(type: Copy) {
+    from 'build/outputs/aar/keepalive-release.aar'
+    into '../../android/libs'
+    rename { 'CB-KeepAlive.aar' }
+    
+    doLast {
+        println "=========================================="
+        println "AAR文件已复制到: android/libs/CB-KeepAlive.aar"
+        println "=========================================="
+    }
+}
+
+afterEvaluate {
+    tasks.findByName('assembleRelease')?.finalizedBy('copyAarToPlugin')
+}
